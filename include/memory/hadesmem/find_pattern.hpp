@@ -500,7 +500,7 @@ inline void* FindInFile(Process const& process,
   }
 
   auto const base = file_view.GetHandle();
-  auto const size = detail::GetRegionAllocSize(process, base);
+  auto const size = detail::GetModuleRegionSize(process, base);
   return Find(process, base, size, data, flags, start, name);
 }
 

@@ -27,30 +27,18 @@ namespace hadesmem
 {
 namespace detail
 {
-// TODO: Should break_on_bad_protect be the default?
-inline SIZE_T GetRegionAllocSize(hadesmem::Process const& process,
-                                 void const* base,
-                                 bool break_on_bad_protect = false)
+// TODO: Rename this file.
+inline SIZE_T GetModuleRegionSize(hadesmem::Process const& process,
+                                  void const* base,
+                                  bool break_on_bad_protect = true)
 {
-  // The technique we're using will not work to get the size of images mapped
-  // with large pages (the start address of the mapping is randomized).
-  auto const peb = GetPeb(process);
-  if (!!(peb.BitField & 1))
-  {
-    HADESMEM_DETAIL_THROW_EXCEPTION(
-      Error{} << ErrorString{
-        "GetRegionAllocSize does not currently support large pages."});
-  }
-
   hadesmem::Region r{process, base};
 
   hadesmem::RegionList regions{process};
-  auto iter = std::find_if(std::begin(regions),
-                           std::end(regions),
-                           [&](Region const& region)
-                           {
-                             return region.GetAllocBase() == r.GetAllocBase();
-                           });
+  auto iter = std::find_if(
+    std::begin(regions), std::end(regions), [&](Region const& region) {
+      return region.GetAllocBase() == r.GetAllocBase();
+    });
   SIZE_T size{};
   while (iter != std::end(regions) && iter->GetAllocBase() == r.GetAllocBase())
   {

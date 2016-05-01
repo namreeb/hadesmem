@@ -115,7 +115,7 @@ public:
     }
 
     detoured_mod =
-      std::make_pair(base, hadesmem::detail::GetRegionAllocSize(process, base));
+      std::make_pair(base, hadesmem::detail::GetModuleRegionSize(process, base));
 
     HADESMEM_DETAIL_TRACE_FORMAT_W(
       L"Base: [%p]. Size: [%IX].", detoured_mod.first, detoured_mod.second);

@@ -13,6 +13,7 @@
 #include <psapi.h>
 
 #include <hadesmem/config.hpp>
+#include <hadesmem/detail/filesystem.hpp>
 #include <hadesmem/detail/peb.hpp>
 #include <hadesmem/detail/str_conv.hpp>
 #include <hadesmem/find_procedure.hpp>
@@ -75,6 +76,12 @@ inline void WriteDumpFile(Process const& process,
   CreateDirectoryWrapper(proc_pid_dir, false);
   std::wstring dump_path = CombinePath(proc_pid_dir, region_name);
 
+  if (DoesFileExist(dump_path))
+  {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error() << ErrorString("Target file already exists."));
+  }
+
   HADESMEM_DETAIL_TRACE_A("Opening file.");
 
   auto const dump_file =
@@ -111,6 +118,8 @@ inline std::wstring
     // correct in some cases (e.g. Overwatch) but not all (e.g. some packers
     // which unmap themselves and then write a totally new module to that
     // location).
+    // TODO: Instead of a config flag (as above), is there a better solution to
+    // this problem that doesn't involve guessing?
     if (p == imagebase)
     {
       try
@@ -198,6 +207,14 @@ inline std::wstring
   }
 }
 
+inline std::wstring MakeNameFromPath(std::wstring const& path)
+{
+  // Don't need to worry about name overlap because when we write the file to
+  // disk we prepend the base address to the filename.
+  return path.empty() ? L"unknown_hadesmem.dll"
+                      : path.substr(path.rfind(L'\\') + 1);
+}
+
 struct ModuleLight
 {
   ModuleLight(Process const& process,
@@ -206,7 +223,9 @@ struct ModuleLight
               bool use_disk_headers,
               void* imagebase)
     : process_{process},
-      pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)}
+      pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
+      path_{GetRegionPath(process, base, imagebase)},
+      name_{MakeNameFromPath(path_)}
   {
     // TODO: Do our best to get module name, path, etc. here. For manually
     // mapped modules we can check the export directory for a module name.
@@ -214,17 +233,44 @@ struct ModuleLight
     // filename, be an invalid file name, etc. Should probably do some
     // sanitization on the data (e.g. ascii alphanumeric only) and then use it
     // plus the region address or something to ensure it's unique.
-    // TODO: Ensure this doesn't overlap with an existing name. We could
-    // easily get two different modules with the same name loaded into a
-    // process. For example, this happens by default with WoW64, but there are
-    // also lots of other valid scenarios.
 
-    path_ = GetRegionPath(process, base, imagebase);
-    name_ = path_.empty() ? (L"unknown_" + PtrToHexString(base) + L".dll")
-                          : path_.substr(path_.rfind(L'\\') + 1);
+    // TODO: Detect cases where we have the same module name multiple times
+    // (other than manually mapped modules). Right now we should probably just
+    // warn/log until we decide whether it's worth fixing.
 
-    HADESMEM_DETAIL_TRACE_FORMAT_W(
-      L"Name: [%s]. Path: [%s].", name_.c_str(), path_.c_str());
+    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Base: [%p]. Name: [%s]. Path: [%s].",
+                                   base,
+                                   name_.c_str(),
+                                   path_.c_str());
+
+    // Priority is -1 without a path.
+    if (!path_.empty())
+    {
+      auto const name_upper = ToUpperOrdinal(name_);
+      if (name_upper == L"KERNEL32.DLL")
+      {
+        priority_ = 3;
+      }
+      else if (name_upper == L"OLE32.DLL")
+      {
+        priority_ = 2;
+      }
+      else if (name_upper == L"NTDLL.DLL" || name_upper == L"SHLWAPI.DLL" ||
+               name_upper == L"SHIMENG.DLL" ||
+               !_wcsnicmp(name_upper.c_str(), L"API-", 4) ||
+               !_wcsnicmp(name_upper.c_str(), L"EXT-", 4))
+      {
+        priority_ = 0;
+      }
+      else if (name_upper == L"KERNELBASE.DLL")
+      {
+        priority_ = -1;
+      }
+      else
+      {
+        priority_ = 1;
+      }
+    }
 
     if (path_.empty())
     {
@@ -269,8 +315,9 @@ struct ModuleLight
 
   Process process_;
   PeFile pe_file_;
-  std::wstring name_;
   std::wstring path_;
+  std::wstring name_;
+  std::int32_t priority_ = -1;
 };
 
 struct ExportLight
@@ -356,16 +403,12 @@ private:
     for (auto const& region : regions)
     {
       auto const region_beg = static_cast<std::uint8_t*>(region.GetBase());
-      if (!region_beg)
+      auto const region_end = region_beg + region.GetSize();
+      if (!region_beg || region_end < region_beg)
       {
         continue;
       }
 
-      auto const region_end = region_beg + region.GetSize();
-
-      // TODO: Verify the pages.
-
-      // TODO: Better validations.
       if (!CanRead(process, region_beg) || IsBadProtect(process, region_beg))
       {
         continue;
@@ -387,7 +430,7 @@ private:
         // case where we do have headers it's not a big deal because we only use
         // this size to determine the maximum amount of data to read, not the
         // minimum.
-        auto const size = GetRegionAllocSize(process, p, true);
+        auto const size = GetModuleRegionSize(process, p, true);
         if (size > static_cast<DWORD>(-1))
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -429,6 +472,8 @@ private:
       ExportList exports(m.process_, m.pe_file_);
       for (auto const& e : exports)
       {
+        ModuleLight const* resolved_module = &m;
+
         auto va = e.GetVa();
         if (e.IsForwarded())
         {
@@ -450,6 +495,21 @@ private:
             // api-ms-win-core-libraryloader-l1-1-0), but that seems to be
             // relatively unimportant as it doesn't appear to affect the
             // behavior of the file.
+            // TODO: This is incorrect. For example, we're currently resolving
+            // ole32.dll!CLSIDFromProgID as combase.dll!CLSIDFromProgID. We
+            // can't establish the link to prefer ole32.dll because we don't
+            // resolve the API set. This needs to be fixed in order for the
+            // import filtering to work effectively!
+
+            // TODO: However, not performing the aforementioned transformation
+            // might weaken some of the algorithms we use or intend to use. For
+            // example, if we have 5 imports in a row from Kernel32, then one
+            // from KernelBase, then another 5 from Kernel32 (or worse, a bunch
+            // of contiguous thunks from Kenrel32 which have all been redirected
+            // to different modules), we might mistake the single thunk(s) as
+            // invalid, because right now we get a lot of real invalid thunks so
+            // we need to perform some filtering, but that would break this case
+            // unless we detect and handle it.
 
             // TODO: Improve support for modules which import directly from the
             // API set modules. They break the link between the high level and
@@ -459,7 +519,35 @@ private:
             // module then we will always select KernelBase for that API even if
             // Kernel32 would be a better fit (e.g. for import coalescing).
 
+            // TODO: Detect and handle cases where imports have been shimmed?
+
             va = GetProcAddressFromExport(process, e);
+
+            auto forwarder_module_name = e.GetForwarderModule();
+            forwarder_module_name =
+              forwarder_module_name.find('.') != std::string::npos
+                ? forwarder_module_name
+                : (forwarder_module_name + ".DLL");
+
+            auto const iter = std::find_if(
+              std::begin(process_info.modules_),
+              std::end(process_info.modules_),
+              [&](ModuleLight const& i) {
+                return ToUpperOrdinal(i.name_) ==
+                       ToUpperOrdinal(hadesmem::detail::MultiByteToWideChar(
+                         forwarder_module_name));
+              });
+            if (iter != std::end(process_info.modules_))
+            {
+              HADESMEM_DETAIL_TRACE_FORMAT_A(
+                "Resolved forwarded module. Name: [%s].",
+                forwarder_module_name.c_str());
+
+              // TODO: Fix this. We need to make sure we look up the correct new
+              // procedure number etc to create the ExportLight struct, we can't
+              // just swap out the module.
+              // resolved_module = &*iter;
+            }
 
             HADESMEM_DETAIL_TRACE_FORMAT_A(
               "Resolved forwarded export. VA: [%p].", va);
@@ -509,8 +597,8 @@ private:
 
         HADESMEM_DETAIL_TRACE_A("Adding to export map.");
 
-        process_info.export_map_[va].emplace_back(
-          ExportLight{&m, e.ByName(), e.GetName(), e.GetProcedureNumber()});
+        process_info.export_map_[va].emplace_back(ExportLight{
+          resolved_module, e.ByName(), e.GetName(), e.GetProcedureNumber()});
       }
     }
 
@@ -518,6 +606,18 @@ private:
                                    process_info.modules_.size());
     HADESMEM_DETAIL_TRACE_FORMAT_A("Num Export VAs: [%Iu].",
                                    process_info.export_map_.size());
+
+    HADESMEM_DETAIL_TRACE_A("Sorting modules by priority.");
+
+    for (auto& i : process_info.export_map_)
+    {
+      auto& modules = i.second;
+      std::sort(std::begin(modules),
+                std::end(modules),
+                [](ExportLight const& lhs, ExportLight const& rhs) {
+                  return lhs.module_->priority_ < rhs.module_->priority_;
+                });
+    }
 
     return process_info;
   }
@@ -528,12 +628,10 @@ private:
     auto const& modules = process_info.modules_;
     auto const& export_map = process_info.export_map_;
 
-    auto const module_iter = std::find_if(std::begin(modules),
-                                          std::end(modules),
-                                          [&](ModuleLight const& m)
-                                          {
-                                            return m.pe_file_.GetBase() == base;
-                                          });
+    auto const module_iter = std::find_if(
+      std::begin(modules), std::end(modules), [&](ModuleLight const& m) {
+        return m.pe_file_.GetBase() == base;
+      });
 
     if (module_iter == std::end(modules))
     {
@@ -884,6 +982,8 @@ private:
             HADESMEM_DETAIL_TRACE_A("WARNING! Successfully resolved redirected "
                                     "import, but then failed to match it to an "
                                     "export.");
+            fixup_adjacent = false;
+            continue;
           }
         }
 
@@ -942,13 +1042,9 @@ private:
           continue;
         }
 
-        // Default to the first one seen.
-        // TODO: Add some logic to determine what the best 'default' value is.
-        // E.g. We should probably pick kernel32 over kernelbase, or kernel32
-        // over api-ms-win-core-*, or kernel32 over ntdll, or pretty much
-        // anything over shimeng/apphelp/etc., etc.
+        // Modules are sorted by priority. Lowest to highest.
         auto& fixup_export = fixup_map[rva];
-        fixup_export = &i->second.front();
+        fixup_export = &i->second.back();
 
         // Try and match to use the same module as the previous adjacent fixup
         // if possible (there could be a different match because of forwarded
@@ -959,10 +1055,11 @@ private:
         // will get its own descriptor to a different module).
         auto const prev_rva = rva - static_cast<DWORD>(sizeof(void*));
         auto const prev_fixup_iter = fixup_map.find(prev_rva);
-        if (auto const prev_module_base =
-              prev_fixup_iter == std::end(fixup_map)
-                ? nullptr
-                : prev_fixup_iter->second->module_->pe_file_.GetBase())
+        auto const prev_module_base =
+          prev_fixup_iter == std::end(fixup_map)
+            ? nullptr
+            : prev_fixup_iter->second->module_->pe_file_.GetBase();
+        if (prev_module_base)
         {
           for (auto& e : i->second)
           {
@@ -990,18 +1087,20 @@ private:
         HADESMEM_DETAIL_TRACE_A("WARNING! Empty import reconstruction list.");
       }
 
-      // TODO: Sort import descriptors by module name.
-
       HADESMEM_DETAIL_TRACE_A("Coalescing import descriptors.");
 
       std::map<DWORD, std::vector<ExportLight const*>> coalesced_fixup_map;
       DWORD cur_rva_base = 0;
+      void* prev_module_base = nullptr;
       DWORD prev_rva = 0;
       for (auto const& f : fixup_map)
       {
-        if (!prev_rva || f.first != prev_rva + sizeof(void*))
+        auto const cur_module_base = f.second->module_->pe_file_.GetBase();
+        if (!prev_rva || f.first != prev_rva + sizeof(void*) ||
+            cur_module_base != prev_module_base)
         {
           cur_rva_base = f.first;
+          prev_module_base = cur_module_base;
         }
 
         coalesced_fixup_map[cur_rva_base].emplace_back(f.second);
@@ -1017,7 +1116,7 @@ private:
       // TODO: Figure out why IDA doesn't like our import tables sometimes. It
       // shows the import fine in the disassembly view (including name, xrefs,
       // etc) but not in the imports tab. It seems to happen when we have
-      // multiple impor descriptors for the same library name, because removing
+      // multiple import descriptors for the same library name, because removing
       // the additional entries causes the missing ones to show up...
 
       HADESMEM_DETAIL_TRACE_A("Removing redundant import descriptors.");
@@ -1038,12 +1137,81 @@ private:
           if (static_cast<std::size_t>(num_thunks) == iter->second.size())
           {
             HADESMEM_DETAIL_TRACE_A("Found perfect match.");
+            // TODO: Actually do something. Make sure we're not overlapping work
+            // with the checks below when adding existing import dirs.
           }
         }
       }
 
-      // TODO: Sort fixup map by Name RVA (of the module descriptor). That seems
-      // to be how MSVC is ordering them.
+      HADESMEM_DETAIL_TRACE_A("Filtering imports.");
+
+      // Filter out invalid entries. Very basic algorithm right now.
+      // TODO: Improve the algorithm for detecting which thunks are valid and
+      // which are not.
+      // TODO: Add and 'aggressive' switch to disable this pass.
+      // TODO: Ideally the user would be able to filter these manually and we
+      // could turn on aggressive mode by default (the config switch would still
+      // need to stay in case the user wanted to disable aggressive mode on a
+      // binary where it caused large amounts of FPs).
+      // TODO: Do more extensive testing with this disabled, because it's
+      // probably covering up bugs like the one with IDA having trouble
+      // processing our imports.
+      // TODO: Figure out why IDA can't process our imports properly sometimes.
+      std::map<void*, std::pair<DWORD, std::vector<ExportLight const*>>>
+        filtered_fixup_map;
+      for (auto const& fixup : coalesced_fixup_map)
+      {
+        auto const module_base =
+          fixup.second.back()->module_->pe_file_.GetBase();
+        auto& filtered = filtered_fixup_map[module_base];
+        if (!filtered.first || filtered.second.size() < fixup.second.size())
+        {
+          filtered = fixup;
+        }
+      }
+
+      HADESMEM_DETAIL_TRACE_A("Translating filtered imports.");
+
+      auto const old_coalesced_fixup_map = coalesced_fixup_map;
+      coalesced_fixup_map.clear();
+      for (auto const& fixup : filtered_fixup_map)
+      {
+        coalesced_fixup_map[fixup.second.first] = fixup.second.second;
+      }
+
+      HADESMEM_DETAIL_TRACE_A("Re-adding incorrectly filtered imports.");
+
+      for (auto iter = std::begin(old_coalesced_fixup_map),
+                prev = std::end(old_coalesced_fixup_map);
+           iter != std::end(old_coalesced_fixup_map);
+           prev = iter++)
+      {
+        // If it's already there we don't need to do anything.
+        if (coalesced_fixup_map.find(iter->first) !=
+            std::end(coalesced_fixup_map))
+        {
+          continue;
+        }
+
+        auto next = std::next(iter);
+        auto const cur_end =
+          (iter->first + iter->second.size() * sizeof(void*));
+        auto const prev_end =
+          prev != std::end(old_coalesced_fixup_map)
+            ? prev->first + prev->second.size() * sizeof(void*)
+            : 0;
+        auto const kAlign = 0x10;
+        if ((next != std::end(old_coalesced_fixup_map) &&
+             cur_end + kAlign >= next->first) ||
+            (prev_end && prev_end + kAlign >= iter->first))
+        {
+          HADESMEM_DETAIL_TRACE_A("Re-inserting incorrectly filtered import.");
+          coalesced_fixup_map[iter->first] = iter->second;
+        }
+      }
+
+      // TODO: Sort fixup map by Name RVA (of the module descriptor)? That seems
+      // to be how MSVC is ordering them. Double check that though.
 
       HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
 
@@ -1072,10 +1240,8 @@ private:
       // enough space to expand that in memory).
       for (auto const& va_map : coalesced_fixup_map)
       {
-        // TODO: Make this case insensitive? Need to think about it and make
-        // sure it's a reasonable thing to do. Probably should have a flag to
-        // turn it off just in case (e.g. case-sensitive filesystems).
-        auto const& module_name = va_map.second.back()->module_->name_;
+        auto const& module_name =
+          ToUpperOrdinal(va_map.second.back()->module_->name_);
         auto& module_name_rva = module_name_rvas[module_name];
         if (!module_name_rva)
         {
@@ -1181,11 +1347,34 @@ private:
           local_process, pe_file_headers, dir.GetFirstThunk());
         auto const num_fts = std::distance(std::begin(import_thunks_ft),
                                            std::end(import_thunks_ft));
+
+        // Skip the on-disk directory if the scanned directory is the same size
+        // or larger (for packers which put FTs in virtual space and dynamically
+        // fill it themselves).
+        // TODO: Fix this for the case where the on-disk IAT is larger than the
+        // scanned one. In this case we should probably expand the size of the
+        // scanned list, but we can't do that here as we've already written it.
+        // Need to move this to one phase earlier.
+        auto const iter = coalesced_fixup_map.find(dir.GetFirstThunk());
+        if (iter != std::end(coalesced_fixup_map) &&
+            iter->second.size() >= static_cast<std::size_t>(num_fts))
+        {
+          continue;
+        }
+
+        // Skip if the directory has unaligned FTs.
+        // TODO: Put this behind a config flag.
+        if (!!(dir.GetFirstThunk() & 3))
+        {
+          continue;
+        }
+
         hadesmem::ImportThunkList import_thunks_oft(
           local_process, pe_file_headers, dir.GetOriginalFirstThunk());
         auto const num_ofts = std::distance(std::begin(import_thunks_oft),
                                             std::end(import_thunks_oft));
-        auto const num_new_existing_imports = (std::min)(num_fts, num_ofts);
+        auto const num_new_existing_imports =
+          (std::min)(num_fts, num_ofts ? num_ofts : num_fts);
         HADESMEM_DETAIL_TRACE_FORMAT_A("Adding %d existing imports.");
         num_existing_imports += num_new_existing_imports;
 
@@ -1254,6 +1443,14 @@ private:
         PeDataDir::Import, last_section.GetVirtualAddress() + old_section_end);
       nt_headers_new.SetDataDirectorySize(PeDataDir::Import, descriptors_cur);
 
+      // TODO: Instead of searching for and placing individual
+      // descriptors/thunks, we should search for the original IAT as a whole.
+      // This won't always work vs all packers, but it should probably be the
+      // default, and then the current behavior of doing everything from scratch
+      // should be moved behind a config flag. (See also the 'aggressive' flag.)
+      nt_headers_new.SetDataDirectoryVirtualAddress(PeDataDir::IAT, 0);
+      nt_headers_new.SetDataDirectorySize(PeDataDir::IAT, 0);
+
       HADESMEM_DETAIL_TRACE_A("Setting image size.");
 
       auto const new_image_size = static_cast<DWORD>(RoundUp(
@@ -1320,8 +1517,11 @@ private:
 
     // TODO: Write to a new sub-directory each time (e.g.
     // pe_dumps\foo.exe\1234\1).
-    WriteDumpFile(
-      *process_, m->name_, raw_new.data(), raw_new.size(), L"pe_dumps");
+    WriteDumpFile(*process_,
+                  PtrToHexString<wchar_t>(base) + L"_" + m->name_,
+                  raw_new.data(),
+                  raw_new.size(),
+                  L"pe_dumps");
   }
 
   // TODO: Clean this up. It's a mess right now...
@@ -1382,6 +1582,10 @@ private:
   // 0:000> ln 0x00007ffe`b7341315 + 0x3970
   // (00007ffe`b7344c90)   kernel32!GetModuleHandleAStub
   // TODO: This should be a plugin/extension/whatever.
+  // TODO: Doesn't work since the last patch, and I won't be updating it for
+  // legal reasons. Not going to remove it though because whilst it's not useful
+  // for its original purpose it still serves as an example of how to extend the
+  // import redirection resolution code.
   void* ResolveRedirectedImportForOverwatch(void* va) const
   {
 #if defined(HADESMEM_DETAIL_ARCH_X64)

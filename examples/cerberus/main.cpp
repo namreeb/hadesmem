@@ -591,7 +591,7 @@ bool IsSafeToUnload()
   auto const& process = hadesmem::cerberus::GetThisProcess();
   auto const this_module =
     reinterpret_cast<std::uint8_t*>(hadesmem::detail::GetHandleToSelf());
-  auto const this_module_size = hadesmem::detail::GetRegionAllocSize(
+  auto const this_module_size = hadesmem::detail::GetModuleRegionSize(
     process, reinterpret_cast<void const*>(this_module));
 
   bool safe = false;

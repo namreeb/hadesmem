@@ -138,11 +138,11 @@ public:
       }
       catch (...)
       {
-        auto const region_alloc_size =
-          detail::GetRegionAllocSize(*process_, base_);
-        HADESMEM_DETAIL_ASSERT(region_alloc_size <
+        auto const module_region_size =
+          detail::GetModuleRegionSize(*process_, base_);
+        HADESMEM_DETAIL_ASSERT(module_region_size <
                                (std::numeric_limits<DWORD>::max)());
-        size_ = static_cast<DWORD>(region_alloc_size);
+        size_ = static_cast<DWORD>(module_region_size);
       }
     }
 
