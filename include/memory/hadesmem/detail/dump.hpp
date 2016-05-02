@@ -277,6 +277,7 @@ struct ModuleLight
       L"Base: [%p]. Name: [%s]. Priority: [%d]. Path: [%s].",
       base,
       name_.c_str(),
+      priority_,
       path_.c_str());
 
     if (path_.empty())
