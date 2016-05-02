@@ -663,6 +663,8 @@ private:
                                            std::vector<std::uint8_t>& raw_new,
                                            std::vector<std::uint8_t> const& raw)
   {
+    HADESMEM_DETAIL_TRACE_A("Copying section data.");
+
     std::vector<SectionData> section_datas;
 
     SectionList const sections(local_process, pe_file_headers);
@@ -756,6 +758,8 @@ private:
                          PeFile const& pe_file_new,
                          std::vector<SectionData> const& section_datas)
   {
+    HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
+
     SectionList sections_new(local_process, pe_file_new);
     std::size_t n = 0;
     for (auto& section : sections_new)
@@ -784,6 +788,8 @@ private:
                          bool has_disk_headers,
                          std::unique_ptr<PeFile> const& pe_file_disk)
   {
+    HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
+
     NtHeaders nt_headers_new(local_process, pe_file_new);
 
     // TODO: Add flag.
@@ -818,6 +824,187 @@ private:
     nt_headers_new.UpdateWrite();
 
     return nt_headers_new;
+  }
+
+  std::map<DWORD, ExportLight const*>
+    DoMemoryScan(std::vector<std::uint8_t>& raw_new,
+                 std::map<void*, std::vector<ExportLight>> const& export_map,
+                 void* base,
+                 std::size_t pe_size,
+                 Process const& local_process,
+                 PeFile const& pe_file_new)
+  {
+    HADESMEM_DETAIL_TRACE_A("Performing memory scan.");
+
+    // TODO: Support other scanning algorithms.
+    // TODO: Be smarter about deciding which imports are legitimate and which
+    // are false positives.
+    // TODO: Ensure imports to hidden modules are found correctly. Required
+    // for when a manually mapped module is manually mapping its dependencies.
+    std::map<DWORD, ExportLight const*> fixup_map;
+    bool fixup_adjacent = false;
+    for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
+         p += 4)
+    {
+      auto const offset =
+        static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(p) -
+                           reinterpret_cast<std::uintptr_t>(raw_new.data()));
+
+      auto va = *reinterpret_cast<void**>(p);
+      auto i = export_map.find(va);
+      if (i == std::end(export_map))
+      {
+        // TODO: Make sure this doesn't overlap with any previous fixups,
+        // redirected or otherwise?
+        auto const resolved_va = ResolveRedirectedImport(va);
+        if (!resolved_va)
+        {
+          fixup_adjacent = false;
+          continue;
+        }
+
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "Resolved redirected import (unverified). Old: [%p]. New: [%p].",
+          va,
+          resolved_va);
+
+        i = export_map.find(resolved_va);
+        if (i == std::end(export_map))
+        {
+          HADESMEM_DETAIL_TRACE_A("WARNING! Successfully resolved redirected "
+                                  "import, but then failed to match it to an "
+                                  "export.");
+          fixup_adjacent = false;
+          continue;
+        }
+      }
+
+      if (va >= base && va <= static_cast<std::uint8_t*>(base) + pe_size)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_A(
+          "WARNING! Skipping VA in current module. Offset: [%08X]. VA: [%p].",
+          offset,
+          va);
+        continue;
+      }
+
+      {
+        auto const e = i->second.back();
+        HADESMEM_DETAIL_TRACE_FORMAT_W(
+          L"Found matching VA. Logging last entry only. Offset: [%08X]. VA: "
+          L"[%p]. Module: [%s]. Name: [%hs]. Ordinal: [%lu]. ByName: [%d].",
+          offset,
+          va,
+          e.module_->name_.c_str(),
+          e.name_.c_str(),
+          e.ordinal_,
+          e.by_name_);
+      }
+
+      auto const rva =
+        FileOffsetToRva(local_process, pe_file_new, static_cast<DWORD>(offset));
+
+      HADESMEM_DETAIL_TRACE_FORMAT_A("RVA: [%08lX].", rva);
+
+      // Only fixup page aligned VAs if they are adjacent to another fixup,
+      // because it would be too risky to reconstruct them otherwise (high
+      // chance of false positives when scanning for references).
+      // TODO: Also check the next fixup, not just the previous one. We could
+      // be adjacent in either direction and it still counts.
+      // TODO: Add a 'skip list' and log any matches we find later for
+      // debugging purposes (or cases where advanced users may want to
+      // manually apply some fixes).
+      // TODO: Add an override switch?
+      if (!(reinterpret_cast<std::uintptr_t>(va) % 0x1000) && !fixup_adjacent)
+      {
+        auto const next_va = *reinterpret_cast<void**>(p + 8);
+        auto const next_e = export_map.find(next_va);
+        if (next_e == std::end(export_map))
+        {
+          HADESMEM_DETAIL_TRACE_A("WARNING! Skipping page aligned VA.");
+          continue;
+        }
+      }
+
+      auto const fixup = fixup_map.find(rva);
+      // TODO: Should this be impossible?
+      if (fixup != std::end(fixup_map))
+      {
+        HADESMEM_DETAIL_TRACE_A("WARNING! Skipping duplicate RVA.");
+        continue;
+      }
+
+      // Modules are sorted by priority. Lowest to highest.
+      auto& fixup_export = fixup_map[rva];
+      fixup_export = &i->second.back();
+
+      // Try and match to use the same module as the previous adjacent fixup
+      // if possible (there could be a different match because of forwarded
+      // exports).
+      // TODO: Handle the case where the first import in a list is to a
+      // forwarded export. In this case we may detect the initial module wrong
+      // (the rest of the list will still be correct, but the first import
+      // will get its own descriptor to a different module).
+      auto const prev_rva = rva - static_cast<DWORD>(sizeof(void*));
+      auto const prev_fixup_iter = fixup_map.find(prev_rva);
+      auto const prev_module_base =
+        prev_fixup_iter == std::end(fixup_map)
+          ? nullptr
+          : prev_fixup_iter->second->module_->pe_file_.GetBase();
+      if (prev_module_base)
+      {
+        for (auto& e : i->second)
+        {
+          if (fixup_export != &e &&
+              e.module_->pe_file_.GetBase() == prev_module_base)
+          {
+            HADESMEM_DETAIL_TRACE_FORMAT_W(
+              L"Adjusting fixup to match module of "
+              L"previous fixup. Previous: [%s]. "
+              L"Current: [%s].",
+              fixup_export->module_->name_.c_str(),
+              e.module_->name_.c_str());
+            fixup_export = &e;
+            break;
+          }
+        }
+      }
+
+      fixup_adjacent = true;
+      p += sizeof(void*) - 4;
+    }
+
+    if (fixup_map.empty())
+    {
+      HADESMEM_DETAIL_TRACE_A("WARNING! Empty import reconstruction list.");
+    }
+
+    return fixup_map;
+  }
+
+  std::vector<std::uint8_t>
+    CopyHeaders(NtHeaders const& nt_headers,
+                std::size_t pe_size,
+                bool has_disk_headers,
+                std::vector<std::uint8_t> const& raw,
+                std::vector<char> const& pe_file_disk_data)
+  {
+    HADESMEM_DETAIL_TRACE_A("Copying headers.");
+
+    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
+    // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
+    // when we open the PE file object later pointing to the buffer, if we add
+    // more data to the buffer it won't be reallocated.
+    raw_new.reserve(pe_size * 5);
+    auto const headers_buf_beg =
+      has_disk_headers
+        ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
+        : raw.data();
+    std::copy(headers_buf_beg,
+              headers_buf_beg + nt_headers.GetSizeOfHeaders(),
+              raw_new.data());
+
+    return raw_new;
   }
 
   void DumpSingleModule(void* base, ModuleLight const* m = nullptr)
@@ -902,22 +1089,8 @@ private:
     PeFile const& pe_file_headers = has_disk_headers ? *pe_file_disk : pe_file;
     NtHeaders nt_headers(local_process, pe_file_headers);
 
-    HADESMEM_DETAIL_TRACE_A("Copying headers.");
-
-    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
-    // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
-    // when we open the PE file object later pointing to the buffer, if we add
-    // more data to the buffer it won't be reallocated.
-    raw_new.reserve(pe_size * 5);
-    auto const headers_buf_beg =
-      has_disk_headers
-        ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
-        : raw.data();
-    std::copy(headers_buf_beg,
-              headers_buf_beg + nt_headers.GetSizeOfHeaders(),
-              raw_new.data());
-
-    HADESMEM_DETAIL_TRACE_A("Copying section data.");
+    auto raw_new = CopyHeaders(
+      nt_headers, pe_size, has_disk_headers, raw, pe_file_disk_data);
 
     auto const section_datas =
       CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
@@ -930,12 +1103,8 @@ private:
                              static_cast<DWORD>(raw_new.size()));
     auto const raw_new_capacity = raw_new.capacity();
 
-    HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
-
     auto nt_headers_new = FixNtHeaders(
       local_process, pe_file_new, base, has_disk_headers, pe_file_disk);
-
-    HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
 
     FixSectionHeaders(local_process, pe_file_new, section_datas);
 
@@ -963,150 +1132,8 @@ private:
           : static_cast<DWORD>(RoundUp(last_section.GetVirtualSize(),
                                        nt_headers_new.GetSectionAlignment()));
 
-      HADESMEM_DETAIL_TRACE_A("Performing memory scan.");
-
-      // TODO: Support other scanning algorithms.
-      // TODO: Be smarter about deciding which imports are legitimate and which
-      // are false positives.
-      // TODO: Ensure imports to hidden modules are found correctly. Required
-      // for when a manually mapped module is manually mapping its dependencies.
-      std::map<DWORD, ExportLight const*> fixup_map;
-      bool fixup_adjacent = false;
-      for (auto p = raw_new.data(); p < raw_new.data() + raw_new.size() - 3;
-           p += 4)
-      {
-        auto const offset =
-          static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(p) -
-                             reinterpret_cast<std::uintptr_t>(raw_new.data()));
-
-        auto va = *reinterpret_cast<void**>(p);
-        auto i = export_map.find(va);
-        if (i == std::end(export_map))
-        {
-          // TODO: Make sure this doesn't overlap with any previous fixups,
-          // redirected or otherwise?
-          auto const resolved_va = ResolveRedirectedImport(va);
-          if (!resolved_va)
-          {
-            fixup_adjacent = false;
-            continue;
-          }
-
-          HADESMEM_DETAIL_TRACE_FORMAT_A(
-            "Resolved redirected import (unverified). Old: [%p]. New: [%p].",
-            va,
-            resolved_va);
-
-          i = export_map.find(resolved_va);
-          if (i == std::end(export_map))
-          {
-            HADESMEM_DETAIL_TRACE_A("WARNING! Successfully resolved redirected "
-                                    "import, but then failed to match it to an "
-                                    "export.");
-            fixup_adjacent = false;
-            continue;
-          }
-        }
-
-        if (va >= base && va <= static_cast<std::uint8_t*>(base) + pe_size)
-        {
-          HADESMEM_DETAIL_TRACE_FORMAT_A(
-            "WARNING! Skipping VA in current module. Offset: [%08X]. VA: [%p].",
-            offset,
-            va);
-          continue;
-        }
-
-        {
-          auto const e = i->second.back();
-          HADESMEM_DETAIL_TRACE_FORMAT_W(
-            L"Found matching VA. Logging last entry only. Offset: [%08X]. VA: "
-            L"[%p]. Module: [%s]. Name: [%hs]. Ordinal: [%lu]. ByName: [%d].",
-            offset,
-            va,
-            e.module_->name_.c_str(),
-            e.name_.c_str(),
-            e.ordinal_,
-            e.by_name_);
-        }
-
-        auto const rva = FileOffsetToRva(
-          local_process, pe_file_new, static_cast<DWORD>(offset));
-
-        HADESMEM_DETAIL_TRACE_FORMAT_A("RVA: [%08lX].", rva);
-
-        // Only fixup page aligned VAs if they are adjacent to another fixup,
-        // because it would be too risky to reconstruct them otherwise (high
-        // chance of false positives when scanning for references).
-        // TODO: Also check the next fixup, not just the previous one. We could
-        // be adjacent in either direction and it still counts.
-        // TODO: Add a 'skip list' and log any matches we find later for
-        // debugging purposes (or cases where advanced users may want to
-        // manually apply some fixes).
-        // TODO: Add an override switch?
-        if (!(reinterpret_cast<std::uintptr_t>(va) % 0x1000) && !fixup_adjacent)
-        {
-          auto const next_va = *reinterpret_cast<void**>(p + 8);
-          auto const next_e = export_map.find(next_va);
-          if (next_e == std::end(export_map))
-          {
-            HADESMEM_DETAIL_TRACE_A("WARNING! Skipping page aligned VA.");
-            continue;
-          }
-        }
-
-        auto const fixup = fixup_map.find(rva);
-        // TODO: Should this be impossible?
-        if (fixup != std::end(fixup_map))
-        {
-          HADESMEM_DETAIL_TRACE_A("WARNING! Skipping duplicate RVA.");
-          continue;
-        }
-
-        // Modules are sorted by priority. Lowest to highest.
-        auto& fixup_export = fixup_map[rva];
-        fixup_export = &i->second.back();
-
-        // Try and match to use the same module as the previous adjacent fixup
-        // if possible (there could be a different match because of forwarded
-        // exports).
-        // TODO: Handle the case where the first import in a list is to a
-        // forwarded export. In this case we may detect the initial module wrong
-        // (the rest of the list will still be correct, but the first import
-        // will get its own descriptor to a different module).
-        auto const prev_rva = rva - static_cast<DWORD>(sizeof(void*));
-        auto const prev_fixup_iter = fixup_map.find(prev_rva);
-        auto const prev_module_base =
-          prev_fixup_iter == std::end(fixup_map)
-            ? nullptr
-            : prev_fixup_iter->second->module_->pe_file_.GetBase();
-        if (prev_module_base)
-        {
-          for (auto& e : i->second)
-          {
-            if (fixup_export != &e &&
-                e.module_->pe_file_.GetBase() == prev_module_base)
-            {
-              HADESMEM_DETAIL_TRACE_FORMAT_W(
-                L"Adjusting fixup to match module of "
-                L"previous fixup. Previous: [%s]. "
-                L"Current: [%s].",
-                fixup_export->module_->name_.c_str(),
-                e.module_->name_.c_str());
-              fixup_export = &e;
-              break;
-            }
-          }
-        }
-
-        fixup_adjacent = true;
-        p += sizeof(void*) - 4;
-      }
-
-      if (fixup_map.empty())
-      {
-        HADESMEM_DETAIL_TRACE_A("WARNING! Empty import reconstruction list.");
-      }
+      auto const fixup_map = DoMemoryScan(
+        raw_new, export_map, base, pe_size, local_process, pe_file_new);
 
       auto coalesced_fixup_map = CoalesceImportDescriptors(fixup_map);
 
@@ -1203,9 +1230,9 @@ private:
                   L"pe_dumps");
   }
 
-  std::map<DWORD, std::vector<ExportLight const*>> CoalesceImportDescriptors(std::map<DWORD, ExportLight const*> const& fixup_map)
+  std::map<DWORD, std::vector<ExportLight const*>> CoalesceImportDescriptors(
+    std::map<DWORD, ExportLight const*> const& fixup_map)
   {
-
     HADESMEM_DETAIL_TRACE_A("Coalescing import descriptors.");
 
     std::map<DWORD, std::vector<ExportLight const*>> coalesced_fixup_map;
@@ -1216,7 +1243,7 @@ private:
     {
       auto const cur_module_base = f.second->module_->pe_file_.GetBase();
       if (!prev_rva || f.first != prev_rva + sizeof(void*) ||
-        cur_module_base != prev_module_base)
+          cur_module_base != prev_module_base)
       {
         cur_rva_base = f.first;
         prev_module_base = cur_module_base;
