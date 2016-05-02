@@ -215,6 +215,40 @@ inline std::wstring MakeNameFromPath(std::wstring const& path)
                       : path.substr(path.rfind(L'\\') + 1);
 }
 
+inline std::int32_t GetModulePriority(std::wstring const& name,
+                                      std::wstring const& path)
+{
+  if (path.empty())
+  {
+    return -1;
+  }
+
+  auto const name_upper = ToUpperOrdinal(name);
+  if (name_upper == L"KERNEL32.DLL")
+  {
+    return 3;
+  }
+  else if (name_upper == L"OLE32.DLL")
+  {
+    return 2;
+  }
+  else if (name_upper == L"NTDLL.DLL" || name_upper == L"SHLWAPI.DLL" ||
+           name_upper == L"SHIMENG.DLL" ||
+           !_wcsnicmp(name_upper.c_str(), L"API-", 4) ||
+           !_wcsnicmp(name_upper.c_str(), L"EXT-", 4))
+  {
+    return 0;
+  }
+  else if (name_upper == L"KERNELBASE.DLL")
+  {
+    return -1;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
 struct ModuleLight
 {
   ModuleLight(Process const& process,
@@ -225,7 +259,8 @@ struct ModuleLight
     : process_{process},
       pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
       path_{GetRegionPath(process, base, imagebase)},
-      name_{MakeNameFromPath(path_)}
+      name_{MakeNameFromPath(path_)},
+      priority_{GetModulePriority(name_, path_)}
   {
     // TODO: Do our best to get module name, path, etc. here. For manually
     // mapped modules we can check the export directory for a module name.
@@ -238,39 +273,11 @@ struct ModuleLight
     // (other than manually mapped modules). Right now we should probably just
     // warn/log until we decide whether it's worth fixing.
 
-    HADESMEM_DETAIL_TRACE_FORMAT_W(L"Base: [%p]. Name: [%s]. Path: [%s].",
-                                   base,
-                                   name_.c_str(),
-                                   path_.c_str());
-
-    // Priority is -1 without a path.
-    if (!path_.empty())
-    {
-      auto const name_upper = ToUpperOrdinal(name_);
-      if (name_upper == L"KERNEL32.DLL")
-      {
-        priority_ = 3;
-      }
-      else if (name_upper == L"OLE32.DLL")
-      {
-        priority_ = 2;
-      }
-      else if (name_upper == L"NTDLL.DLL" || name_upper == L"SHLWAPI.DLL" ||
-               name_upper == L"SHIMENG.DLL" ||
-               !_wcsnicmp(name_upper.c_str(), L"API-", 4) ||
-               !_wcsnicmp(name_upper.c_str(), L"EXT-", 4))
-      {
-        priority_ = 0;
-      }
-      else if (name_upper == L"KERNELBASE.DLL")
-      {
-        priority_ = -1;
-      }
-      else
-      {
-        priority_ = 1;
-      }
-    }
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Base: [%p]. Name: [%s]. Priority: [%d]. Path: [%s].",
+      base,
+      name_.c_str(),
+      path_.c_str());
 
     if (path_.empty())
     {
@@ -281,26 +288,7 @@ struct ModuleLight
     // corrupted.
     if (use_disk_headers && !path_.empty())
     {
-      try
-      {
-        auto buffer = PeFileToBuffer(path_);
-        Process local_process{::GetCurrentProcessId()};
-        PeFile pe_file{local_process,
-                       buffer.data(),
-                       PeFileType::Data,
-                       static_cast<DWORD>(buffer.size())};
-        NtHeaders nt_headers{local_process, pe_file};
-      }
-      catch (...)
-      {
-        HADESMEM_DETAIL_TRACE_FORMAT_W(
-          L"WARNING! Failed to verify on-disk headers. Path: [%s].",
-          path_.c_str());
-        HADESMEM_DETAIL_TRACE_A(
-          boost::current_exception_diagnostic_information().c_str());
-
-        use_disk_headers = false;
-      }
+      use_disk_headers = ValidateDiskHeaders();
     }
 
     if (!use_disk_headers)
@@ -313,11 +301,35 @@ struct ModuleLight
     }
   }
 
+  bool ValidateDiskHeaders()
+  {
+    try
+    {
+      auto buffer = PeFileToBuffer(path_);
+      Process local_process{::GetCurrentProcessId()};
+      PeFile pe_file{local_process,
+                     buffer.data(),
+                     PeFileType::Data,
+                     static_cast<DWORD>(buffer.size())};
+      NtHeaders nt_headers{local_process, pe_file};
+      return true;
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_W(
+        L"WARNING! Failed to verify on-disk headers. Path: [%s].",
+        path_.c_str());
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+      return false;
+    }
+  }
+
   Process process_;
   PeFile pe_file_;
   std::wstring path_;
   std::wstring name_;
-  std::int32_t priority_ = -1;
+  std::int32_t priority_;
 };
 
 struct ExportLight
@@ -359,7 +371,7 @@ public:
       add_new_section_{add_new_section},
       oep_{oep},
       m_{m},
-      process_light_(BuildExportMap(process))
+      process_light_(MakeProcessLight())
   {
   }
 
@@ -377,11 +389,11 @@ public:
 
   void Reset()
   {
-    process_light_ = BuildExportMap(*process_);
+    process_light_ = MakeProcessLight();
   }
 
 private:
-  inline ProcessLight BuildExportMap(Process const& process)
+  void BuildModuleList(ProcessLight& process_info)
   {
     HADESMEM_DETAIL_TRACE_A("Getting page size.");
 
@@ -391,15 +403,11 @@ private:
 
     HADESMEM_DETAIL_TRACE_A("Getting PEB.");
 
-    auto const peb = GetPeb(process);
+    auto const peb = GetPeb(*process_);
 
     HADESMEM_DETAIL_TRACE_FORMAT_A("ImageBase: [%p].", peb.ImageBaseAddress);
 
-    HADESMEM_DETAIL_TRACE_A("Building module list.");
-
-    ProcessLight process_info;
-
-    RegionList regions(process);
+    RegionList regions(*process_);
     for (auto const& region : regions)
     {
       auto const region_beg = static_cast<std::uint8_t*>(region.GetBase());
@@ -409,14 +417,15 @@ private:
         continue;
       }
 
-      if (!CanRead(process, region_beg) || IsBadProtect(process, region_beg))
+      if (!CanRead(*process_, region_beg) ||
+          IsBadProtect(*process_, region_beg))
       {
         continue;
       }
 
       for (auto p = region_beg; p + page_size <= region_end; p += page_size)
       {
-        auto const mz = Read<std::array<char, 2>>(process, p);
+        auto const mz = Read<std::array<char, 2>>(*process_, p);
         if (mz[0] != 'M' || mz[1] != 'Z')
         {
           continue;
@@ -430,7 +439,7 @@ private:
         // case where we do have headers it's not a big deal because we only use
         // this size to determine the maximum amount of data to read, not the
         // minimum.
-        auto const size = GetModuleRegionSize(process, p, true);
+        auto const size = GetModuleRegionSize(*process_, p, true);
         if (size > static_cast<DWORD>(-1))
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -446,7 +455,7 @@ private:
           HADESMEM_DETAIL_TRACE_A("Checking for valid headers, and retrieving "
                                   "region name and optional path.");
           process_info.modules_.emplace_back(
-            process, p, size, use_disk_headers_, peb.ImageBaseAddress);
+            *process_, p, size, use_disk_headers_, peb.ImageBaseAddress);
         }
         catch (...)
         {
@@ -458,9 +467,10 @@ private:
         }
       }
     }
+  }
 
-    HADESMEM_DETAIL_TRACE_A("Building export map.");
-
+  void BuildExportMap(ProcessLight& process_info)
+  {
     // TODO: Only do this if import reconstruction is enabled.
     for (auto const& m : process_info.modules_)
     {
@@ -521,7 +531,7 @@ private:
 
             // TODO: Detect and handle cases where imports have been shimmed?
 
-            va = GetProcAddressFromExport(process, e);
+            va = GetProcAddressFromExport(*process_, e);
 
             auto forwarder_module_name = e.GetForwarderModule();
             forwarder_module_name =
@@ -606,9 +616,10 @@ private:
                                    process_info.modules_.size());
     HADESMEM_DETAIL_TRACE_FORMAT_A("Num Export VAs: [%Iu].",
                                    process_info.export_map_.size());
+  }
 
-    HADESMEM_DETAIL_TRACE_A("Sorting modules by priority.");
-
+  void SortModules(ProcessLight& process_info)
+  {
     for (auto& i : process_info.export_map_)
     {
       auto& modules = i.second;
@@ -618,117 +629,43 @@ private:
                   return lhs.module_->priority_ < rhs.module_->priority_;
                 });
     }
+  }
+
+  ProcessLight MakeProcessLight()
+  {
+    ProcessLight process_info;
+
+    HADESMEM_DETAIL_TRACE_A("Building module list.");
+
+    BuildModuleList(process_info);
+
+    HADESMEM_DETAIL_TRACE_A("Building export map.");
+
+    BuildExportMap(process_info);
+
+    HADESMEM_DETAIL_TRACE_A("Sorting modules by priority.");
+
+    SortModules(process_info);
 
     return process_info;
   }
 
-  inline void DumpSingleModule(void* base, ModuleLight const* m = nullptr) const
+  struct SectionData
   {
-    auto const& process_info = process_light_;
-    auto const& modules = process_info.modules_;
-    auto const& export_map = process_info.export_map_;
+    DWORD raw_data_;
+    DWORD raw_size_;
+    DWORD virtual_size_;
+  };
 
-    auto const module_iter = std::find_if(
-      std::begin(modules), std::end(modules), [&](ModuleLight const& m) {
-        return m.pe_file_.GetBase() == base;
-      });
-
-    if (module_iter == std::end(modules))
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error() << ErrorString("Failed to find target module."));
-    }
-
-    m = &*module_iter;
-
-    auto const size = m->pe_file_.GetSize();
-
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Starting module dumping. Base: [%p]. Size: [%X].", base, size);
-
-    HADESMEM_DETAIL_TRACE_A("Reading memory.");
-
-    auto raw = ReadVectorEx<std::uint8_t>(
-      *process_, base, size, ReadFlags::kZeroFillReserved);
-    Process const local_process(::GetCurrentProcessId());
-    PeFile const pe_file(local_process,
-                         raw.data(),
-                         PeFileType::Image,
-                         static_cast<DWORD>(raw.size()));
-
-    bool has_disk_headers = use_disk_headers_;
-
-    auto const& region_path = m->path_;
-    if (region_path.empty())
-    {
-      HADESMEM_DETAIL_TRACE_A(
-        "WARNING! No region path, not attempting to use disk headers.");
-      has_disk_headers = false;
-    }
-
-    // TODO: Don't hard-fail if we request disk headers but can't get them?
-
-    std::vector<char> pe_file_disk_data;
-    std::unique_ptr<PeFile> pe_file_disk;
-    if (has_disk_headers)
-    {
-      try
-      {
-        HADESMEM_DETAIL_TRACE_FORMAT_W(L"Using disk headers. Path: [%s].",
-                                       region_path.c_str());
-
-        // TODO: Disable WoW64 FS redirection.
-
-        // TODO: Support not failing here if we don't have file headers, because
-        // we want to support dumping manually mapped PE files with headers.
-        // (Sounds like it defeats the purpose but it's more common than you
-        // might think...)
-        pe_file_disk_data = PeFileToBuffer(region_path);
-        pe_file_disk = std::make_unique<PeFile>(
-          local_process,
-          pe_file_disk_data.data(),
-          PeFileType::Data,
-          static_cast<DWORD>(pe_file_disk_data.size()));
-      }
-      catch (...)
-      {
-        HADESMEM_DETAIL_TRACE_A(
-          "WARNING! Error attempting to open disk headers.");
-        HADESMEM_DETAIL_TRACE_A(
-          boost::current_exception_diagnostic_information().c_str());
-
-        has_disk_headers = false;
-      }
-    }
-
-    PeFile const& pe_file_headers = has_disk_headers ? *pe_file_disk : pe_file;
-    NtHeaders nt_headers(local_process, pe_file_headers);
-
-    HADESMEM_DETAIL_TRACE_A("Copying headers.");
-
-    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
-    // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
-    // when we open the PE file object later pointing to the buffer, if we add
-    // more data to the buffer it won't be reallocated.
-    raw_new.reserve(size * 5);
-    auto const headers_buf_beg =
-      has_disk_headers
-        ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
-        : raw.data();
-    std::copy(headers_buf_beg,
-              headers_buf_beg + nt_headers.GetSizeOfHeaders(),
-              raw_new.data());
-
-    HADESMEM_DETAIL_TRACE_A("Copying section data.");
+  std::vector<SectionData> CopySectionData(Process const& local_process,
+                                           PeFile const& pe_file_headers,
+                                           NtHeaders const& nt_headers,
+                                           std::vector<std::uint8_t>& raw_new,
+                                           std::vector<std::uint8_t> const& raw)
+  {
+    std::vector<SectionData> section_datas;
 
     SectionList const sections(local_process, pe_file_headers);
-    struct SectionData
-    {
-      DWORD raw_data_;
-      DWORD raw_size_;
-      DWORD virtual_size_;
-    };
-    std::vector<SectionData> section_datas;
     for (auto const& section : sections)
     {
       HADESMEM_DETAIL_TRACE_FORMAT_A(
@@ -812,16 +749,41 @@ private:
       section_datas.back().raw_size_ = raw_section_size;
     }
 
-    HADESMEM_DETAIL_ASSERT(raw_new.size() <
-                           (std::numeric_limits<DWORD>::max)());
-    PeFile const pe_file_new(local_process,
-                             raw_new.data(),
-                             PeFileType::Data,
-                             static_cast<DWORD>(raw_new.size()));
-    auto const raw_new_capacity = raw_new.capacity();
+    return section_datas;
+  }
 
-    HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
+  void FixSectionHeaders(Process const& local_process,
+                         PeFile const& pe_file_new,
+                         std::vector<SectionData> const& section_datas)
+  {
+    SectionList sections_new(local_process, pe_file_new);
+    std::size_t n = 0;
+    for (auto& section : sections_new)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("PointerToRawData: [%08lX] -> [%08lX]. "
+                                     "SizeOfRawData: [%08lX] -> [%08lX]. "
+                                     "VirtualSize: [%08lX] -> [%08lX].",
+                                     section.GetPointerToRawData(),
+                                     section_datas[n].raw_data_,
+                                     section.GetSizeOfRawData(),
+                                     section_datas[n].raw_size_,
+                                     section.GetVirtualSize(),
+                                     section_datas[n].virtual_size_);
 
+      section.SetPointerToRawData(section_datas[n].raw_data_);
+      section.SetSizeOfRawData(section_datas[n].raw_size_);
+      section.SetVirtualSize(section_datas[n].virtual_size_);
+      section.UpdateWrite();
+      ++n;
+    }
+  }
+
+  NtHeaders FixNtHeaders(Process const& local_process,
+                         PeFile const& pe_file_new,
+                         void* base,
+                         bool has_disk_headers,
+                         std::unique_ptr<PeFile> const& pe_file_disk)
+  {
     NtHeaders nt_headers_new(local_process, pe_file_new);
 
     // TODO: Add flag.
@@ -855,78 +817,137 @@ private:
 
     nt_headers_new.UpdateWrite();
 
-    HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
+    return nt_headers_new;
+  }
 
-    SectionList sections_new(local_process, pe_file_new);
-    std::size_t n = 0;
-    for (auto& section : sections_new)
+  void DumpSingleModule(void* base, ModuleLight const* m = nullptr)
+  {
+    auto const& process_info = process_light_;
+    auto const& modules = process_info.modules_;
+    auto const& export_map = process_info.export_map_;
+
+    auto const module_iter = std::find_if(
+      std::begin(modules), std::end(modules), [&](ModuleLight const& m) {
+        return m.pe_file_.GetBase() == base;
+      });
+
+    if (module_iter == std::end(modules))
     {
-      HADESMEM_DETAIL_TRACE_FORMAT_A("PointerToRawData: [%08lX] -> [%08lX]. "
-                                     "SizeOfRawData: [%08lX] -> [%08lX]. "
-                                     "VirtualSize: [%08lX] -> [%08lX].",
-                                     section.GetPointerToRawData(),
-                                     section_datas[n].raw_data_,
-                                     section.GetSizeOfRawData(),
-                                     section_datas[n].raw_size_,
-                                     section.GetVirtualSize(),
-                                     section_datas[n].virtual_size_);
-
-      section.SetPointerToRawData(section_datas[n].raw_data_);
-      section.SetSizeOfRawData(section_datas[n].raw_size_);
-      section.SetVirtualSize(section_datas[n].virtual_size_);
-      section.UpdateWrite();
-      ++n;
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error() << ErrorString("Failed to find target module."));
     }
 
-    // Expand the last section to hold our new import directories.
-    // TODO: Add a new section instead of expanding the last section.
+    m = &*module_iter;
+
+    auto const pe_size = m->pe_file_.GetSize();
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Starting module dumping. Base: [%p]. Size: [%X].", base, pe_size);
+
+    HADESMEM_DETAIL_TRACE_A("Reading memory.");
+
+    auto raw = ReadVectorEx<std::uint8_t>(
+      *process_, base, pe_size, ReadFlags::kZeroFillReserved);
+    Process const local_process(::GetCurrentProcessId());
+    PeFile const pe_file(local_process,
+                         raw.data(),
+                         PeFileType::Image,
+                         static_cast<DWORD>(raw.size()));
+
+    bool has_disk_headers = use_disk_headers_;
+
+    auto const& region_path = m->path_;
+    if (region_path.empty())
+    {
+      HADESMEM_DETAIL_TRACE_A(
+        "WARNING! No region path, not attempting to use disk headers.");
+      has_disk_headers = false;
+    }
+
+    // TODO: Don't hard-fail if we request disk headers but can't get them?
+
+    std::vector<char> pe_file_disk_data;
+    std::unique_ptr<PeFile> pe_file_disk;
+    if (has_disk_headers)
+    {
+      try
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(L"Using disk headers. Path: [%s].",
+                                       region_path.c_str());
+
+        // TODO: Disable WoW64 FS redirection.
+
+        // TODO: Support not failing here if we don't have file headers, because
+        // we want to support dumping manually mapped PE files with headers.
+        // (Sounds like it defeats the purpose but it's more common than you
+        // might think...)
+        pe_file_disk_data = PeFileToBuffer(region_path);
+        pe_file_disk = std::make_unique<PeFile>(
+          local_process,
+          pe_file_disk_data.data(),
+          PeFileType::Data,
+          static_cast<DWORD>(pe_file_disk_data.size()));
+      }
+      catch (...)
+      {
+        HADESMEM_DETAIL_TRACE_A(
+          "WARNING! Error attempting to open disk headers.");
+        HADESMEM_DETAIL_TRACE_A(
+          boost::current_exception_diagnostic_information().c_str());
+
+        has_disk_headers = false;
+      }
+    }
+
+    PeFile const& pe_file_headers = has_disk_headers ? *pe_file_disk : pe_file;
+    NtHeaders nt_headers(local_process, pe_file_headers);
+
+    HADESMEM_DETAIL_TRACE_A("Copying headers.");
+
+    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
+    // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
+    // when we open the PE file object later pointing to the buffer, if we add
+    // more data to the buffer it won't be reallocated.
+    raw_new.reserve(pe_size * 5);
+    auto const headers_buf_beg =
+      has_disk_headers
+        ? reinterpret_cast<std::uint8_t const*>(pe_file_disk_data.data())
+        : raw.data();
+    std::copy(headers_buf_beg,
+              headers_buf_beg + nt_headers.GetSizeOfHeaders(),
+              raw_new.data());
+
+    HADESMEM_DETAIL_TRACE_A("Copying section data.");
+
+    auto const section_datas =
+      CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
+
+    HADESMEM_DETAIL_ASSERT(raw_new.size() <
+                           (std::numeric_limits<DWORD>::max)());
+    PeFile const pe_file_new(local_process,
+                             raw_new.data(),
+                             PeFileType::Data,
+                             static_cast<DWORD>(raw_new.size()));
+    auto const raw_new_capacity = raw_new.capacity();
+
+    HADESMEM_DETAIL_TRACE_A("Fixing NT headers.");
+
+    auto nt_headers_new = FixNtHeaders(
+      local_process, pe_file_new, base, has_disk_headers, pe_file_disk);
+
+    HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
+
+    FixSectionHeaders(local_process, pe_file_new, section_datas);
+
     if (reconstruct_imports_)
     {
       HADESMEM_DETAIL_TRACE_A("Reconstructing imports.");
 
-      auto can_add_new_section = add_new_section_;
-      if (add_new_section_)
-      {
-        hadesmem::Section last_section(
-          local_process, pe_file_new, nt_headers_new.GetNumberOfSections() - 1);
-        // TODO: Is this correct in all cases?
-        auto const new_section_header_beg =
-          static_cast<std::uint8_t*>(last_section.GetBase()) +
-          sizeof(IMAGE_SECTION_HEADER);
-        auto const new_section_header_end =
-          new_section_header_beg + sizeof(IMAGE_SECTION_HEADER);
-        if (new_section_header_end <=
-            raw_new.data() + nt_headers_new.GetSizeOfHeaders())
-        {
-          HADESMEM_DETAIL_TRACE_A("Adding new section.");
-
-          IMAGE_SECTION_HEADER hadesmem_section{};
-          std::memcpy(hadesmem_section.Name, ".hmem", sizeof(".hmem"));
-          hadesmem_section.VirtualAddress =
-            last_section.GetVirtualAddress() + last_section.GetVirtualSize();
-          hadesmem_section.PointerToRawData =
-            last_section.GetPointerToRawData() +
-            last_section.GetSizeOfRawData();
-          hadesmem_section.Characteristics =
-            IMAGE_SCN_CNT_CODE | IMAGE_SCN_CNT_INITIALIZED_DATA |
-            IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
-
-          std::copy(reinterpret_cast<std::uint8_t*>(&hadesmem_section),
-                    reinterpret_cast<std::uint8_t*>(&hadesmem_section + 1),
-                    new_section_header_beg);
-
-          nt_headers_new.SetNumberOfSections(
-            nt_headers_new.GetNumberOfSections() + 1);
-          nt_headers_new.UpdateWrite();
-        }
-        else
-        {
-          HADESMEM_DETAIL_TRACE_A("WARNING! No space for new section.");
-          can_add_new_section = false;
-        }
-      }
+      auto const can_add_new_section =
+        TryAddNewSection(local_process, pe_file_new, nt_headers_new, raw_new);
 
       std::vector<Section> sections_vec;
+      SectionList sections_new(local_process, pe_file_new);
       std::copy(std::begin(sections_new),
                 std::end(sections_new),
                 std::back_inserter(sections_vec));
@@ -987,7 +1008,7 @@ private:
           }
         }
 
-        if (va >= base && va <= static_cast<std::uint8_t*>(base) + size)
+        if (va >= base && va <= static_cast<std::uint8_t*>(base) + pe_size)
         {
           HADESMEM_DETAIL_TRACE_FORMAT_A(
             "WARNING! Skipping VA in current module. Offset: [%08X]. VA: [%p].",
@@ -1087,26 +1108,7 @@ private:
         HADESMEM_DETAIL_TRACE_A("WARNING! Empty import reconstruction list.");
       }
 
-      HADESMEM_DETAIL_TRACE_A("Coalescing import descriptors.");
-
-      std::map<DWORD, std::vector<ExportLight const*>> coalesced_fixup_map;
-      DWORD cur_rva_base = 0;
-      void* prev_module_base = nullptr;
-      DWORD prev_rva = 0;
-      for (auto const& f : fixup_map)
-      {
-        auto const cur_module_base = f.second->module_->pe_file_.GetBase();
-        if (!prev_rva || f.first != prev_rva + sizeof(void*) ||
-            cur_module_base != prev_module_base)
-        {
-          cur_rva_base = f.first;
-          prev_module_base = cur_module_base;
-        }
-
-        coalesced_fixup_map[cur_rva_base].emplace_back(f.second);
-
-        prev_rva = f.first;
-      }
+      auto coalesced_fixup_map = CoalesceImportDescriptors(fixup_map);
 
       // TODO: Now that we have a full list, try and identify which imports are
       // 'real' and which to ignore (add an extra flag to enable more aggressive
@@ -1119,297 +1121,42 @@ private:
       // multiple import descriptors for the same library name, because removing
       // the additional entries causes the missing ones to show up...
 
-      HADESMEM_DETAIL_TRACE_A("Removing redundant import descriptors.");
+      RemoveRedundantImportDescriptors(
+        local_process, pe_file_headers, coalesced_fixup_map);
 
-      // TODO: Do this after adding the on-disk entries?
-
-      ImportDirList import_dirs(local_process, pe_file_headers);
-      for (auto const& id : import_dirs)
-      {
-        auto const iter = coalesced_fixup_map.find(id.GetFirstThunk());
-        if (iter != std::end(coalesced_fixup_map))
-        {
-          ImportThunkList import_thunks(
-            local_process, pe_file_headers, id.GetFirstThunk());
-          auto const num_thunks =
-            std::distance(std::begin(import_thunks), std::end(import_thunks));
-          HADESMEM_DETAIL_ASSERT(num_thunks >= 0);
-          if (static_cast<std::size_t>(num_thunks) == iter->second.size())
-          {
-            HADESMEM_DETAIL_TRACE_A("Found perfect match.");
-            // TODO: Actually do something. Make sure we're not overlapping work
-            // with the checks below when adding existing import dirs.
-          }
-        }
-      }
-
-      HADESMEM_DETAIL_TRACE_A("Filtering imports.");
-
-      // Filter out invalid entries. Very basic algorithm right now.
-      // TODO: Improve the algorithm for detecting which thunks are valid and
-      // which are not.
-      // TODO: Add and 'aggressive' switch to disable this pass.
-      // TODO: Ideally the user would be able to filter these manually and we
-      // could turn on aggressive mode by default (the config switch would still
-      // need to stay in case the user wanted to disable aggressive mode on a
-      // binary where it caused large amounts of FPs).
-      // TODO: Do more extensive testing with this disabled, because it's
-      // probably covering up bugs like the one with IDA having trouble
-      // processing our imports.
-      // TODO: Figure out why IDA can't process our imports properly sometimes.
-      std::map<void*, std::pair<DWORD, std::vector<ExportLight const*>>>
-        filtered_fixup_map;
-      for (auto const& fixup : coalesced_fixup_map)
-      {
-        auto const module_base =
-          fixup.second.back()->module_->pe_file_.GetBase();
-        auto& filtered = filtered_fixup_map[module_base];
-        if (!filtered.first || filtered.second.size() < fixup.second.size())
-        {
-          filtered = fixup;
-        }
-      }
-
-      HADESMEM_DETAIL_TRACE_A("Translating filtered imports.");
+      auto const filtered_fixup_map = FilterImports(coalesced_fixup_map);
 
       auto const old_coalesced_fixup_map = coalesced_fixup_map;
-      coalesced_fixup_map.clear();
-      for (auto const& fixup : filtered_fixup_map)
-      {
-        coalesced_fixup_map[fixup.second.first] = fixup.second.second;
-      }
+      TranslateFilteredImports(coalesced_fixup_map, filtered_fixup_map);
 
-      HADESMEM_DETAIL_TRACE_A("Re-adding incorrectly filtered imports.");
-
-      for (auto iter = std::begin(old_coalesced_fixup_map),
-                prev = std::end(old_coalesced_fixup_map);
-           iter != std::end(old_coalesced_fixup_map);
-           prev = iter++)
-      {
-        // If it's already there we don't need to do anything.
-        if (coalesced_fixup_map.find(iter->first) !=
-            std::end(coalesced_fixup_map))
-        {
-          continue;
-        }
-
-        auto next = std::next(iter);
-        auto const cur_end =
-          (iter->first + iter->second.size() * sizeof(void*));
-        auto const prev_end =
-          prev != std::end(old_coalesced_fixup_map)
-            ? prev->first + prev->second.size() * sizeof(void*)
-            : 0;
-        auto const kAlign = 0x10;
-        if ((next != std::end(old_coalesced_fixup_map) &&
-             cur_end + kAlign >= next->first) ||
-            (prev_end && prev_end + kAlign >= iter->first))
-        {
-          HADESMEM_DETAIL_TRACE_A("Re-inserting incorrectly filtered import.");
-          coalesced_fixup_map[iter->first] = iter->second;
-        }
-      }
+      ReaddFilteredImports(old_coalesced_fixup_map, coalesced_fixup_map);
 
       // TODO: Sort fixup map by Name RVA (of the module descriptor)? That seems
       // to be how MSVC is ordering them. Double check that though.
 
-      HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
-
-      // Build raw import dirs.
       std::vector<char> import_directories_buf;
-      auto const descriptors_size = static_cast<DWORD>(
-        sizeof(IMAGE_IMPORT_DESCRIPTOR) *
-        (std::distance(std::begin(import_dirs), std::end(import_dirs)) +
-         coalesced_fixup_map.size() + 1));
-      auto const descriptors_end_rva =
-        last_section.GetVirtualAddress() + old_section_end + descriptors_size;
-      import_directories_buf.resize(descriptors_size);
-      // TODO: Fix this hack (see above for the same thing being done to
-      // raw_new).
-      import_directories_buf.reserve(size * 2);
       DWORD descriptors_cur = 0;
+      BuildRawImportDirectoriesBuffer(local_process,
+                                      pe_file_headers,
+                                      coalesced_fixup_map,
+                                      last_section,
+                                      old_section_end,
+                                      import_directories_buf,
+                                      pe_size,
+                                      descriptors_cur);
 
-      std::map<std::wstring, DWORD> module_name_rvas;
-      std::map<std::string, DWORD> import_by_name_rvas;
-
-      std::size_t num_imports = 0;
-
-      // TODO: Don't duplicate entries from existing IAT (above). Need to do
-      // more than just check the first thunk though as the array size could
-      // differ (packed could have an on-disk IAT size of 1, but it leaves
-      // enough space to expand that in memory).
-      for (auto const& va_map : coalesced_fixup_map)
-      {
-        auto const& module_name =
-          ToUpperOrdinal(va_map.second.back()->module_->name_);
-        auto& module_name_rva = module_name_rvas[module_name];
-        if (!module_name_rva)
-        {
-          module_name_rva = descriptors_end_rva +
-                            static_cast<DWORD>(import_directories_buf.size()) -
-                            descriptors_size;
-
-          auto const module_name_narrow = WideCharToMultiByte(module_name);
-          std::copy(std::begin(module_name_narrow),
-                    std::end(module_name_narrow),
-                    std::back_inserter(import_directories_buf));
-          import_directories_buf.push_back('\0');
-        }
-
-        DWORD const thunks_rva =
-          descriptors_end_rva +
-          static_cast<DWORD>(import_directories_buf.size()) - descriptors_size;
-        auto const thunks_offset = import_directories_buf.size();
-        import_directories_buf.resize(thunks_offset +
-                                      sizeof(IMAGE_THUNK_DATA) *
-                                        (va_map.second.size() + 1));
-        auto thunks = reinterpret_cast<PIMAGE_THUNK_DATA>(
-          &import_directories_buf[thunks_offset]);
-
-        IMAGE_IMPORT_DESCRIPTOR descriptor{};
-        // TODO: Flag this.
-        descriptor.OriginalFirstThunk = thunks_rva;
-        descriptor.Name = module_name_rva;
-        descriptor.FirstThunk = va_map.first;
-        std::copy(reinterpret_cast<char const*>(&descriptor),
-                  reinterpret_cast<char const*>(&descriptor) +
-                    sizeof(descriptor),
-                  &import_directories_buf[descriptors_cur]);
-
-        descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
-
-        auto cur_rva = descriptor.FirstThunk;
-        for (auto const& e : va_map.second)
-        {
-          HADESMEM_DETAIL_TRACE_FORMAT_W(
-            L"Processing import reconstruction entry. RVA: [%08lX]. Module: "
-            L"[%s]. Name: [%hs]. Ordinal: [%lu]. ByName: [%d].",
-            cur_rva,
-            module_name.c_str(),
-            e->name_.c_str(),
-            e->ordinal_,
-            e->by_name_);
-
-          if (e->by_name_)
-          {
-            auto& import_by_name_rva = import_by_name_rvas[e->name_];
-            if (!import_by_name_rva)
-            {
-              import_by_name_rva =
-                descriptors_end_rva +
-                static_cast<DWORD>(import_directories_buf.size()) -
-                descriptors_size;
-
-              // TODO: Set Hint.
-              std::vector<char> import_by_name_buf(
-                sizeof(IMAGE_IMPORT_BY_NAME::Hint) + e->name_.size() + 1);
-              auto const import_by_name =
-                reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(
-                  import_by_name_buf.data());
-              std::copy(std::begin(e->name_),
-                        std::end(e->name_),
-                        &import_by_name->Name[0]);
-
-              std::copy(std::begin(import_by_name_buf),
-                        std::end(import_by_name_buf),
-                        std::back_inserter(import_directories_buf));
-            }
-
-            thunks->u1.AddressOfData = import_by_name_rva;
-          }
-          else
-          {
-            thunks->u1.Ordinal =
-              IMAGE_ORDINAL_FLAG | (e->ordinal_ & static_cast<WORD>(-1));
-          }
-
-          ++num_imports;
-          ++thunks;
-          cur_rva += sizeof(void*);
-        }
-      }
-
-      std::size_t num_existing_imports = 0;
-      (void)num_existing_imports;
-
-      // TODO: Instead of adding the entries here unconditionally, we should
-      // drop redundant entries.
-      // TODO: Instead of just copying the entries over, we should use them as
-      // the base of a scan earlier on, and just let them fall into our own
-      // custom IAT naturally. This has the advantage of ensuring they are valid
-      // and coalescing the location of all descriptors, at the slight
-      // disadvantage of potentially missing some APIs (although that should be
-      // quite rare as long as we implement the memory scan properly).
-      HADESMEM_DETAIL_TRACE_A("Adding existing import directories.");
-      for (auto const& dir : import_dirs)
-      {
-        hadesmem::ImportThunkList import_thunks_ft(
-          local_process, pe_file_headers, dir.GetFirstThunk());
-        auto const num_fts = std::distance(std::begin(import_thunks_ft),
-                                           std::end(import_thunks_ft));
-
-        // Skip the on-disk directory if the scanned directory is the same size
-        // or larger (for packers which put FTs in virtual space and dynamically
-        // fill it themselves).
-        // TODO: Fix this for the case where the on-disk IAT is larger than the
-        // scanned one. In this case we should probably expand the size of the
-        // scanned list, but we can't do that here as we've already written it.
-        // Need to move this to one phase earlier.
-        auto const iter = coalesced_fixup_map.find(dir.GetFirstThunk());
-        if (iter != std::end(coalesced_fixup_map) &&
-            iter->second.size() >= static_cast<std::size_t>(num_fts))
-        {
-          continue;
-        }
-
-        // Skip if the directory has unaligned FTs.
-        // TODO: Put this behind a config flag.
-        if (!!(dir.GetFirstThunk() & 3))
-        {
-          continue;
-        }
-
-        hadesmem::ImportThunkList import_thunks_oft(
-          local_process, pe_file_headers, dir.GetOriginalFirstThunk());
-        auto const num_ofts = std::distance(std::begin(import_thunks_oft),
-                                            std::end(import_thunks_oft));
-        auto const num_new_existing_imports =
-          (std::min)(num_fts, num_ofts ? num_ofts : num_fts);
-        HADESMEM_DETAIL_TRACE_FORMAT_A("Adding %d existing imports.");
-        num_existing_imports += num_new_existing_imports;
-
-        auto const p =
-          reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(dir.GetBase());
-
-        std::copy(reinterpret_cast<char const*>(p),
-                  reinterpret_cast<char const*>(p) + sizeof(*p),
-                  &import_directories_buf[descriptors_cur]);
-
-        descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
-      }
-
-      descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
-
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Number of Scanned Imports: [%Iu].",
-                                     num_imports);
-
-      HADESMEM_DETAIL_TRACE_FORMAT_A("Number of Existing Imports: [%Iu].",
-                                     num_existing_imports);
+      AddExistingImportDirs(local_process,
+                            pe_file_headers,
+                            coalesced_fixup_map,
+                            import_directories_buf,
+                            descriptors_cur);
 
       // TODO: Should we just bail here if import_directories_buf is empty?
 
       HADESMEM_DETAIL_TRACE_A("Updating last section size.");
 
-      // TODO: This probably doesn't need to be section aligned?
-      auto const import_dirs_aligned_size = static_cast<DWORD>(RoundUp(
-        import_directories_buf.size(), nt_headers_new.GetSectionAlignment()));
-      auto const new_size = old_section_end + import_dirs_aligned_size;
-      last_section.SetSizeOfRawData(new_size);
-      // TODO: Is increasing the virtual size here ever incorrect? (Will be
-      // solved by simply using a new section, but that may not always be
-      // desired, so we should probably keep this branch too.
-      last_section.SetVirtualSize(new_size);
-      last_section.UpdateWrite();
+      auto const new_size = UpdateLastSectionSize(
+        import_directories_buf, nt_headers_new, old_section_end, last_section);
 
       HADESMEM_DETAIL_TRACE_A("Adding new import directories to file.");
 
@@ -1437,82 +1184,14 @@ private:
       // section data was truncated and we didn't appear to detect it properly
       // in the dump tool. Add support for this somewhere.
 
-      HADESMEM_DETAIL_TRACE_A("Setting import data directory info.");
+      SetDataDirectories(
+        nt_headers_new, last_section, old_section_end, descriptors_cur);
 
-      nt_headers_new.SetDataDirectoryVirtualAddress(
-        PeDataDir::Import, last_section.GetVirtualAddress() + old_section_end);
-      nt_headers_new.SetDataDirectorySize(PeDataDir::Import, descriptors_cur);
-
-      // TODO: Instead of searching for and placing individual
-      // descriptors/thunks, we should search for the original IAT as a whole.
-      // This won't always work vs all packers, but it should probably be the
-      // default, and then the current behavior of doing everything from scratch
-      // should be moved behind a config flag. (See also the 'aggressive' flag.)
-      nt_headers_new.SetDataDirectoryVirtualAddress(PeDataDir::IAT, 0);
-      nt_headers_new.SetDataDirectorySize(PeDataDir::IAT, 0);
-
-      HADESMEM_DETAIL_TRACE_A("Setting image size.");
-
-      auto const new_image_size = static_cast<DWORD>(RoundUp(
-        last_section.GetVirtualAddress() + last_section.GetVirtualSize(),
-        nt_headers.GetSectionAlignment()));
-      nt_headers_new.SetSizeOfImage(new_image_size);
-
-      // TODO: Fix checksums (with flag).
-
-      // TODO: Strip DOS stub (with flag).
-
-      nt_headers_new.UpdateWrite();
+      FixHeadersFinal(last_section, nt_headers, nt_headers_new);
     }
     else
     {
-      HADESMEM_DETAIL_TRACE_A("Fixing imports.");
-
-      ImportDirList const import_dirs(local_process, pe_file);
-      ImportDirList const import_dirs_new(local_process, pe_file_new);
-      auto i = std::begin(import_dirs), j = std::begin(import_dirs_new);
-      bool thunk_mismatch = false;
-      for (; i != std::end(import_dirs) && j != std::end(import_dirs_new);
-           ++i, ++j)
-      {
-        // TODO: If we have an empty/invalid ILT we should enumerate the EAT of
-        // all loaded modules and try to match exports to addresses in the IAT.
-        // TODO: Add the option of using the on-disk ILT in the case we can't
-        // find anything else?
-        ImportThunkList const import_thunks(
-          local_process, pe_file, i->GetOriginalFirstThunk());
-        ImportThunkList import_thunks_new(
-          local_process, pe_file_new, j->GetFirstThunk());
-        auto a = std::begin(import_thunks);
-        auto b = std::begin(import_thunks_new);
-        for (; a != std::end(import_thunks) && b != std::end(import_thunks_new);
-             ++a, ++b)
-        {
-          b->SetFunction(a->GetFunction());
-          b->UpdateWrite();
-        }
-        thunk_mismatch = thunk_mismatch || ((a != std::end(import_thunks)) ^
-                                            (b != std::end(import_thunks_new)));
-      }
-      bool const dir_mismatch =
-        (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
-
-      // TODO: In the case of an empty ILT we should only warn here instead of
-      // erroring. We should also provide an option to use the on-disk IAT
-      // (which acts as the ILT until the image is loaded) if it appears to
-      // match, otherwise we will get dumps with a useless IAT for lots of
-      // packed apps (e.g. Skyforge, Titanfall, Dragon Age: Inquisition, etc.).
-      // TODO: Also update the implementation in CXExample.
-
-      if (dir_mismatch)
-      {
-        HADESMEM_DETAIL_TRACE_A("Mismatch in import dir processing.");
-      }
-
-      if (thunk_mismatch)
-      {
-        HADESMEM_DETAIL_TRACE_A("Mismatch in import thunk processing.");
-      }
+      FixImports(local_process, pe_file, pe_file_new);
     }
 
     // TODO: Write to a new sub-directory each time (e.g.
@@ -1522,6 +1201,503 @@ private:
                   raw_new.data(),
                   raw_new.size(),
                   L"pe_dumps");
+  }
+
+  std::map<DWORD, std::vector<ExportLight const*>> CoalesceImportDescriptors(std::map<DWORD, ExportLight const*> const& fixup_map)
+  {
+
+    HADESMEM_DETAIL_TRACE_A("Coalescing import descriptors.");
+
+    std::map<DWORD, std::vector<ExportLight const*>> coalesced_fixup_map;
+    DWORD cur_rva_base = 0;
+    void* prev_module_base = nullptr;
+    DWORD prev_rva = 0;
+    for (auto const& f : fixup_map)
+    {
+      auto const cur_module_base = f.second->module_->pe_file_.GetBase();
+      if (!prev_rva || f.first != prev_rva + sizeof(void*) ||
+        cur_module_base != prev_module_base)
+      {
+        cur_rva_base = f.first;
+        prev_module_base = cur_module_base;
+      }
+
+      coalesced_fixup_map[cur_rva_base].emplace_back(f.second);
+
+      prev_rva = f.first;
+    }
+
+    return coalesced_fixup_map;
+  }
+
+  void RemoveRedundantImportDescriptors(
+    Process const& local_process,
+    PeFile const& pe_file_headers,
+    std::map<DWORD, std::vector<ExportLight const*>> const& coalesced_fixup_map)
+  {
+    HADESMEM_DETAIL_TRACE_A("Removing redundant import descriptors.");
+
+    // TODO: Do this after adding the on-disk entries?
+    ImportDirList const import_dirs(local_process, pe_file_headers);
+    for (auto const& id : import_dirs)
+    {
+      auto const iter = coalesced_fixup_map.find(id.GetFirstThunk());
+      if (iter != std::end(coalesced_fixup_map))
+      {
+        ImportThunkList import_thunks(
+          local_process, pe_file_headers, id.GetFirstThunk());
+        auto const num_thunks =
+          std::distance(std::begin(import_thunks), std::end(import_thunks));
+        HADESMEM_DETAIL_ASSERT(num_thunks >= 0);
+        if (static_cast<std::size_t>(num_thunks) == iter->second.size())
+        {
+          HADESMEM_DETAIL_TRACE_A("Found perfect match.");
+          // TODO: Actually do something. Make sure we're not overlapping work
+          // with the checks below when adding existing import dirs.
+        }
+      }
+    }
+  }
+
+  std::map<void*, std::pair<DWORD, std::vector<ExportLight const*>>>
+    FilterImports(std::map<DWORD, std::vector<ExportLight const*>> const&
+                    coalesced_fixup_map)
+  {
+    HADESMEM_DETAIL_TRACE_A("Filtering imports.");
+
+    // Filter out invalid entries. Very basic algorithm right now.
+    // TODO: Improve the algorithm for detecting which thunks are valid and
+    // which are not.
+    // TODO: Add and 'aggressive' switch to disable this pass.
+    // TODO: Ideally the user would be able to filter these manually and we
+    // could turn on aggressive mode by default (the config switch would still
+    // need to stay in case the user wanted to disable aggressive mode on a
+    // binary where it caused large amounts of FPs).
+    // TODO: Do more extensive testing with this disabled, because it's
+    // probably covering up bugs like the one with IDA having trouble
+    // processing our imports.
+    // TODO: Figure out why IDA can't process our imports properly sometimes.
+    std::map<void*, std::pair<DWORD, std::vector<ExportLight const*>>>
+      filtered_fixup_map;
+    for (auto const& fixup : coalesced_fixup_map)
+    {
+      auto const module_base = fixup.second.back()->module_->pe_file_.GetBase();
+      auto& filtered = filtered_fixup_map[module_base];
+      if (!filtered.first || filtered.second.size() < fixup.second.size())
+      {
+        filtered = fixup;
+      }
+    }
+
+    return filtered_fixup_map;
+  }
+
+  void TranslateFilteredImports(
+    std::map<DWORD, std::vector<ExportLight const*>>& coalesced_fixup_map,
+    std::map<void*, std::pair<DWORD, std::vector<ExportLight const*>>> const&
+      filtered_fixup_map)
+  {
+    HADESMEM_DETAIL_TRACE_A("Translating filtered imports.");
+
+    coalesced_fixup_map.clear();
+    for (auto const& fixup : filtered_fixup_map)
+    {
+      coalesced_fixup_map[fixup.second.first] = fixup.second.second;
+    }
+  }
+
+  void ReaddFilteredImports(
+    std::map<DWORD, std::vector<ExportLight const*>> const&
+      old_coalesced_fixup_map,
+    std::map<DWORD, std::vector<ExportLight const*>>& coalesced_fixup_map)
+  {
+    HADESMEM_DETAIL_TRACE_A("Re-adding incorrectly filtered imports.");
+
+    for (auto iter = std::begin(old_coalesced_fixup_map),
+              prev = std::end(old_coalesced_fixup_map);
+         iter != std::end(old_coalesced_fixup_map);
+         prev = iter++)
+    {
+      // If it's already there we don't need to do anything.
+      if (coalesced_fixup_map.find(iter->first) !=
+          std::end(coalesced_fixup_map))
+      {
+        continue;
+      }
+
+      auto next = std::next(iter);
+      auto const cur_end = (iter->first + iter->second.size() * sizeof(void*));
+      auto const prev_end =
+        prev != std::end(old_coalesced_fixup_map)
+          ? prev->first + prev->second.size() * sizeof(void*)
+          : 0;
+      auto const kAlign = 0x10;
+      if ((next != std::end(old_coalesced_fixup_map) &&
+           cur_end + kAlign >= next->first) ||
+          (prev_end && prev_end + kAlign >= iter->first))
+      {
+        HADESMEM_DETAIL_TRACE_A("Re-inserting incorrectly filtered import.");
+        coalesced_fixup_map[iter->first] = iter->second;
+      }
+    }
+  }
+
+  void BuildRawImportDirectoriesBuffer(
+    Process const& local_process,
+    PeFile const& pe_file_headers,
+    std::map<DWORD, std::vector<ExportLight const*>> const& coalesced_fixup_map,
+    Section const& last_section,
+    DWORD old_section_end,
+    std::vector<char>& import_directories_buf,
+    std::size_t size,
+    DWORD& descriptors_cur)
+  {
+    HADESMEM_DETAIL_TRACE_A("Building raw import directories buffer.");
+
+    // Build raw import dirs.
+    ImportDirList const import_dirs(local_process, pe_file_headers);
+    auto const descriptors_size = static_cast<DWORD>(
+      sizeof(IMAGE_IMPORT_DESCRIPTOR) *
+      (std::distance(std::begin(import_dirs), std::end(import_dirs)) +
+       coalesced_fixup_map.size() + 1));
+    auto const descriptors_end_rva =
+      last_section.GetVirtualAddress() + old_section_end + descriptors_size;
+    import_directories_buf.resize(descriptors_size);
+    // TODO: Fix this hack (see above for the same thing being done to
+    // raw_new).
+    import_directories_buf.reserve(size * 2);
+
+    std::map<std::wstring, DWORD> module_name_rvas;
+    std::map<std::string, DWORD> import_by_name_rvas;
+
+    std::size_t num_imports = 0;
+
+    // TODO: Don't duplicate entries from existing IAT (above). Need to do
+    // more than just check the first thunk though as the array size could
+    // differ (packed could have an on-disk IAT size of 1, but it leaves
+    // enough space to expand that in memory).
+    for (auto const& va_map : coalesced_fixup_map)
+    {
+      auto const& module_name =
+        ToUpperOrdinal(va_map.second.back()->module_->name_);
+      auto& module_name_rva = module_name_rvas[module_name];
+      if (!module_name_rva)
+      {
+        module_name_rva = descriptors_end_rva +
+                          static_cast<DWORD>(import_directories_buf.size()) -
+                          descriptors_size;
+
+        auto const module_name_narrow = WideCharToMultiByte(module_name);
+        std::copy(std::begin(module_name_narrow),
+                  std::end(module_name_narrow),
+                  std::back_inserter(import_directories_buf));
+        import_directories_buf.push_back('\0');
+      }
+
+      DWORD const thunks_rva =
+        descriptors_end_rva +
+        static_cast<DWORD>(import_directories_buf.size()) - descriptors_size;
+      auto const thunks_offset = import_directories_buf.size();
+      import_directories_buf.resize(
+        thunks_offset + sizeof(IMAGE_THUNK_DATA) * (va_map.second.size() + 1));
+      auto thunks = reinterpret_cast<PIMAGE_THUNK_DATA>(
+        &import_directories_buf[thunks_offset]);
+
+      IMAGE_IMPORT_DESCRIPTOR descriptor{};
+      // TODO: Flag this.
+      descriptor.OriginalFirstThunk = thunks_rva;
+      descriptor.Name = module_name_rva;
+      descriptor.FirstThunk = va_map.first;
+      std::copy(reinterpret_cast<char const*>(&descriptor),
+                reinterpret_cast<char const*>(&descriptor) + sizeof(descriptor),
+                &import_directories_buf[descriptors_cur]);
+
+      descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
+
+      auto cur_rva = descriptor.FirstThunk;
+      for (auto const& e : va_map.second)
+      {
+        HADESMEM_DETAIL_TRACE_FORMAT_W(
+          L"Processing import reconstruction entry. RVA: [%08lX]. Module: "
+          L"[%s]. Name: [%hs]. Ordinal: [%lu]. ByName: [%d].",
+          cur_rva,
+          module_name.c_str(),
+          e->name_.c_str(),
+          e->ordinal_,
+          e->by_name_);
+
+        if (e->by_name_)
+        {
+          auto& import_by_name_rva = import_by_name_rvas[e->name_];
+          if (!import_by_name_rva)
+          {
+            import_by_name_rva =
+              descriptors_end_rva +
+              static_cast<DWORD>(import_directories_buf.size()) -
+              descriptors_size;
+
+            // TODO: Set Hint.
+            std::vector<char> import_by_name_buf(
+              sizeof(IMAGE_IMPORT_BY_NAME::Hint) + e->name_.size() + 1);
+            auto const import_by_name = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(
+              import_by_name_buf.data());
+            std::copy(std::begin(e->name_),
+                      std::end(e->name_),
+                      &import_by_name->Name[0]);
+
+            std::copy(std::begin(import_by_name_buf),
+                      std::end(import_by_name_buf),
+                      std::back_inserter(import_directories_buf));
+          }
+
+          thunks->u1.AddressOfData = import_by_name_rva;
+        }
+        else
+        {
+          thunks->u1.Ordinal =
+            IMAGE_ORDINAL_FLAG | (e->ordinal_ & static_cast<WORD>(-1));
+        }
+
+        ++num_imports;
+        ++thunks;
+        cur_rva += sizeof(void*);
+      }
+    }
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Number of Scanned Imports: [%Iu].",
+                                   num_imports);
+  }
+
+  DWORD UpdateLastSectionSize(std::vector<char>& import_directories_buf,
+                              NtHeaders const& nt_headers_new,
+                              DWORD old_section_end,
+                              Section& last_section)
+  {
+    // TODO: This probably doesn't need to be section aligned?
+    auto const import_dirs_aligned_size = static_cast<DWORD>(RoundUp(
+      import_directories_buf.size(), nt_headers_new.GetSectionAlignment()));
+    auto const new_size = old_section_end + import_dirs_aligned_size;
+    last_section.SetSizeOfRawData(new_size);
+    // TODO: Is increasing the virtual size here ever incorrect? (Will be
+    // solved by simply using a new section, but that may not always be
+    // desired, so we should probably keep this branch too.
+    last_section.SetVirtualSize(new_size);
+    last_section.UpdateWrite();
+
+    return new_size;
+  }
+
+  bool TryAddNewSection(Process const& local_process,
+                        PeFile const& pe_file_new,
+                        NtHeaders& nt_headers_new,
+                        std::vector<std::uint8_t> const& raw_new)
+  {
+    if (!add_new_section_)
+    {
+      return false;
+    }
+
+    hadesmem::Section last_section(
+      local_process, pe_file_new, nt_headers_new.GetNumberOfSections() - 1);
+    // TODO: Is this correct in all cases?
+    auto const new_section_header_beg =
+      static_cast<std::uint8_t*>(last_section.GetBase()) +
+      sizeof(IMAGE_SECTION_HEADER);
+    auto const new_section_header_end =
+      new_section_header_beg + sizeof(IMAGE_SECTION_HEADER);
+    if (new_section_header_end >
+        raw_new.data() + nt_headers_new.GetSizeOfHeaders())
+    {
+      // TODO: What can we do to handle this? Is it possible to expand the size
+      // of the headers safely?
+      HADESMEM_DETAIL_TRACE_A("WARNING! No space for new section header.");
+      return false;
+    }
+
+    HADESMEM_DETAIL_TRACE_A("Adding new section.");
+
+    IMAGE_SECTION_HEADER hadesmem_section{};
+    std::memcpy(hadesmem_section.Name, ".hmem", sizeof(".hmem"));
+    hadesmem_section.VirtualAddress =
+      last_section.GetVirtualAddress() + last_section.GetVirtualSize();
+    hadesmem_section.PointerToRawData =
+      last_section.GetPointerToRawData() + last_section.GetSizeOfRawData();
+    hadesmem_section.Characteristics =
+      IMAGE_SCN_CNT_CODE | IMAGE_SCN_CNT_INITIALIZED_DATA |
+      IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
+
+    std::copy(reinterpret_cast<std::uint8_t*>(&hadesmem_section),
+              reinterpret_cast<std::uint8_t*>(&hadesmem_section + 1),
+              new_section_header_beg);
+
+    nt_headers_new.SetNumberOfSections(nt_headers_new.GetNumberOfSections() +
+                                       1);
+    nt_headers_new.UpdateWrite();
+
+    return true;
+  }
+
+  void AddExistingImportDirs(
+    Process const& local_process,
+    PeFile const& pe_file_headers,
+    std::map<DWORD, std::vector<ExportLight const*>> const& coalesced_fixup_map,
+    std::vector<char>& import_directories_buf,
+    DWORD descriptors_cur)
+  {
+    std::size_t num_existing_imports = 0;
+    (void)num_existing_imports;
+
+    // TODO: Instead of adding the entries here unconditionally, we should
+    // drop redundant entries.
+    // TODO: Instead of just copying the entries over, we should use them as
+    // the base of a scan earlier on, and just let them fall into our own
+    // custom IAT naturally. This has the advantage of ensuring they are valid
+    // and coalescing the location of all descriptors, at the slight
+    // disadvantage of potentially missing some APIs (although that should be
+    // quite rare as long as we implement the memory scan properly).
+    HADESMEM_DETAIL_TRACE_A("Adding existing import directories.");
+    ImportDirList const import_dirs(local_process, pe_file_headers);
+    for (auto const& dir : import_dirs)
+    {
+      hadesmem::ImportThunkList import_thunks_ft(
+        local_process, pe_file_headers, dir.GetFirstThunk());
+      auto const num_fts =
+        std::distance(std::begin(import_thunks_ft), std::end(import_thunks_ft));
+
+      // Skip the on-disk directory if the scanned directory is the same size
+      // or larger (for packers which put FTs in virtual space and dynamically
+      // fill it themselves).
+      // TODO: Fix this for the case where the on-disk IAT is larger than the
+      // scanned one. In this case we should probably expand the size of the
+      // scanned list, but we can't do that here as we've already written it.
+      // Need to move this to one phase earlier.
+      auto const iter = coalesced_fixup_map.find(dir.GetFirstThunk());
+      if (iter != std::end(coalesced_fixup_map) &&
+          iter->second.size() >= static_cast<std::size_t>(num_fts))
+      {
+        continue;
+      }
+
+      // Skip if the directory has unaligned FTs.
+      // TODO: Put this behind a config flag.
+      if (!!(dir.GetFirstThunk() & 3))
+      {
+        continue;
+      }
+
+      hadesmem::ImportThunkList import_thunks_oft(
+        local_process, pe_file_headers, dir.GetOriginalFirstThunk());
+      auto const num_ofts = std::distance(std::begin(import_thunks_oft),
+                                          std::end(import_thunks_oft));
+      auto const num_new_existing_imports =
+        (std::min)(num_fts, num_ofts ? num_ofts : num_fts);
+      HADESMEM_DETAIL_TRACE_FORMAT_A("Adding %d existing imports.");
+      num_existing_imports += num_new_existing_imports;
+
+      auto const p = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(dir.GetBase());
+
+      std::copy(reinterpret_cast<char const*>(p),
+                reinterpret_cast<char const*>(p) + sizeof(*p),
+                &import_directories_buf[descriptors_cur]);
+
+      descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
+    }
+
+    descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
+
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Number of Existing Imports: [%Iu].",
+                                   num_existing_imports);
+  }
+
+  void SetDataDirectories(NtHeaders& nt_headers_new,
+                          Section const& last_section,
+                          DWORD old_section_end,
+                          DWORD descriptors_cur)
+  {
+    HADESMEM_DETAIL_TRACE_A("Setting import data directory info.");
+
+    nt_headers_new.SetDataDirectoryVirtualAddress(
+      PeDataDir::Import, last_section.GetVirtualAddress() + old_section_end);
+    nt_headers_new.SetDataDirectorySize(PeDataDir::Import, descriptors_cur);
+
+    // TODO: Instead of searching for and placing individual
+    // descriptors/thunks, we should search for the original IAT as a whole.
+    // This won't always work vs all packers, but it should probably be the
+    // default, and then the current behavior of doing everything from scratch
+    // should be moved behind a config flag. (See also the 'aggressive' flag.)
+    nt_headers_new.SetDataDirectoryVirtualAddress(PeDataDir::IAT, 0);
+    nt_headers_new.SetDataDirectorySize(PeDataDir::IAT, 0);
+  }
+
+  void FixHeadersFinal(Section const& last_section,
+                       NtHeaders const& nt_headers,
+                       NtHeaders& nt_headers_new)
+  {
+    HADESMEM_DETAIL_TRACE_A("Setting image size.");
+
+    auto const new_image_size = static_cast<DWORD>(
+      RoundUp(last_section.GetVirtualAddress() + last_section.GetVirtualSize(),
+              nt_headers.GetSectionAlignment()));
+    nt_headers_new.SetSizeOfImage(new_image_size);
+
+    // TODO: Fix checksums (with flag).
+
+    // TODO: Strip DOS stub (with flag).
+
+    nt_headers_new.UpdateWrite();
+  }
+
+  void FixImports(Process const& local_process,
+                  PeFile const& pe_file,
+                  PeFile const& pe_file_new) const
+  {
+    HADESMEM_DETAIL_TRACE_A("Fixing imports.");
+
+    ImportDirList const import_dirs(local_process, pe_file);
+    ImportDirList const import_dirs_new(local_process, pe_file_new);
+    auto i = std::begin(import_dirs), j = std::begin(import_dirs_new);
+    bool thunk_mismatch = false;
+    for (; i != std::end(import_dirs) && j != std::end(import_dirs_new);
+         ++i, ++j)
+    {
+      // TODO: If we have an empty/invalid ILT we should enumerate the EAT of
+      // all loaded modules and try to match exports to addresses in the IAT.
+      // TODO: Add the option of using the on-disk ILT in the case we can't
+      // find anything else?
+      ImportThunkList const import_thunks(
+        local_process, pe_file, i->GetOriginalFirstThunk());
+      ImportThunkList import_thunks_new(
+        local_process, pe_file_new, j->GetFirstThunk());
+      auto a = std::begin(import_thunks);
+      auto b = std::begin(import_thunks_new);
+      for (; a != std::end(import_thunks) && b != std::end(import_thunks_new);
+           ++a, ++b)
+      {
+        b->SetFunction(a->GetFunction());
+        b->UpdateWrite();
+      }
+      thunk_mismatch = thunk_mismatch || ((a != std::end(import_thunks)) ^
+                                          (b != std::end(import_thunks_new)));
+    }
+    bool const dir_mismatch =
+      (i != std::end(import_dirs)) ^ (j != std::end(import_dirs));
+
+    // TODO: In the case of an empty ILT we should only warn here instead of
+    // erroring. We should also provide an option to use the on-disk IAT
+    // (which acts as the ILT until the image is loaded) if it appears to
+    // match, otherwise we will get dumps with a useless IAT for lots of
+    // packed apps (e.g. Skyforge, Titanfall, Dragon Age: Inquisition, etc.).
+    // TODO: Also update the implementation in CXExample.
+
+    if (dir_mismatch)
+    {
+      HADESMEM_DETAIL_TRACE_A("Mismatch in import dir processing.");
+    }
+
+    if (thunk_mismatch)
+    {
+      HADESMEM_DETAIL_TRACE_A("Mismatch in import thunk processing.");
+    }
   }
 
   // TODO: Clean this up. It's a mess right now...

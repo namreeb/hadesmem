@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Steam\steamapps\common\ManiaPlanet_SMStorm\ManiaPlanet.exe" --inject --steam-app-id 229870 --export Load --add-path --path-resolution --module cerberus.dll
