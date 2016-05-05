@@ -33,14 +33,16 @@ namespace
 auto& GetOnCreateProcessInternalWCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnCreateProcessInternalWCallback> callbacks;
+    hadesmem::cerberus::OnCreateProcessInternalWCallback>
+    callbacks;
   return callbacks;
 }
 
 auto& GetOnRtlExitUserProcessCallbacks()
 {
   static hadesmem::cerberus::Callbacks<
-    hadesmem::cerberus::OnRtlExitUserProcessCallback> callbacks;
+    hadesmem::cerberus::OnRtlExitUserProcessCallback>
+    callbacks;
   return callbacks;
 }
 
@@ -142,7 +144,8 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>>&
   GetCreateProcessInternalWDetour() noexcept
 {
   static std::unique_ptr<
-    hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>> detour;
+    hadesmem::PatchDetour<decltype(&CreateProcessInternalW)>>
+    detour;
   return detour;
 }
 
@@ -250,6 +253,10 @@ extern "C" BOOL WINAPI
     }
   }
 
+  // TODO: Add a 'skip list' that we don't inject into. Things like error
+  // reporting processes, overlay hosts, etc. that are just a source of noise
+  // and have no value being hooked.
+
   auto const create_process_internal_w =
     detour->GetTrampolineT<decltype(&CreateProcessInternalW)>();
   last_error_preserver.Revert();
@@ -296,6 +303,10 @@ extern "C" BOOL WINAPI
     HADESMEM_DETAIL_TRACE_A("Failed.");
     return ret;
   }
+
+  // TODO: Add an option to use SetWindowsHookEx based injection for games which
+  // utilize EAC and similar anti-cheats (does it work vs XignCode?). We should
+  // be okay to do this because OBS needs to do the same thing.
 
   try
   {

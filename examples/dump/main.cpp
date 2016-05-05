@@ -180,6 +180,7 @@ thread_local std::wstring g_current_file_path;
 bool g_quiet = false;
 bool g_strings = false;
 bool g_use_disk_headers = false;
+bool g_use_original_image_path = false;
 bool g_reconstruct_imports = false;
 bool g_add_new_section = false;
 DWORD g_oep = 0;
@@ -354,6 +355,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
   {
     hadesmem::detail::DumpMemory(*process,
                                  g_use_disk_headers,
+                                 g_use_original_image_path,
                                  g_reconstruct_imports,
                                  g_add_new_section,
                                  g_oep,
@@ -363,8 +365,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
   }
   else
   {
-    auto const module_base = [&]() -> void*
-    {
+    auto const module_base = [&]() -> void* {
       if (g_module_base)
       {
         return reinterpret_cast<void*>(g_module_base);
@@ -381,6 +382,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
 
     hadesmem::detail::DumpMemory(*process,
                                  g_use_disk_headers,
+                                 g_use_original_image_path,
                                  g_reconstruct_imports,
                                  g_add_new_section,
                                  g_oep,
@@ -607,6 +609,11 @@ int main(int argc, char* argv[])
       "use-disk-headers",
       "Use on-disk PE header for section layout when performing memory dumps",
       cmd);
+    TCLAP::SwitchArg use_original_image_path_arg(
+      "",
+      "use-original-image-path",
+      "Use original image path if it has been unmapped",
+      cmd);
     TCLAP::SwitchArg reconstruct_imports_arg(
       "", "reconstruct-imports", "Reconstruct imports (build new ILT)", cmd);
     TCLAP::SwitchArg add_new_section_arg(
@@ -642,6 +649,7 @@ int main(int argc, char* argv[])
     g_quiet = quiet_arg.isSet();
     g_strings = strings_arg.isSet();
     g_use_disk_headers = use_disk_headers_arg.isSet();
+    g_use_original_image_path = use_original_image_path_arg.isSet();
     g_reconstruct_imports = reconstruct_imports_arg.isSet();
     g_add_new_section = add_new_section_arg.isSet();
     g_oep = oep_arg.getValue();
@@ -738,8 +746,7 @@ int main(int argc, char* argv[])
       auto iter =
         std::find_if(std::begin(processes),
                      std::end(processes),
-                     [pid](hadesmem::ProcessEntry const& process_entry)
-                     {
+                     [pid](hadesmem::ProcessEntry const& process_entry) {
                        return process_entry.GetId() == pid;
                      });
       if (iter != std::end(processes))
