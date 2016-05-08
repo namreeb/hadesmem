@@ -39,6 +39,8 @@
 
 // TODO: Harden PE format parsing.
 
+// TODO: Investigate spurious failures. (During export mapping?)
+
 namespace hadesmem
 {
 namespace detail
@@ -126,35 +128,35 @@ inline std::wstring GetRegionPathOrDefault(Process const& process,
                                            bool use_original_image_path)
 {
   std::vector<wchar_t> mapped_file_name(HADESMEM_DETAIL_MAX_PATH_UNICODE);
-  if (!::GetMappedFileNameW(process.GetHandle(),
-                            p,
-                            mapped_file_name.data(),
-                            static_cast<DWORD>(mapped_file_name.size())))
+  if (::GetMappedFileNameW(process.GetHandle(),
+                           p,
+                           mapped_file_name.data(),
+                           static_cast<DWORD>(mapped_file_name.size())))
   {
-    DWORD const last_error = ::GetLastError();
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
-
-    // TODO: Instead of a config flag (as above), is there a better solution to
-    // this problem that doesn't involve guessing?
-    if (use_original_image_path && p == imagebase)
-    {
-      try
-      {
-        return hadesmem::GetPathNative(process);
-      }
-      catch (...)
-      {
-        HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Failed to get default path.");
-        HADESMEM_DETAIL_TRACE_A(
-          boost::current_exception_diagnostic_information().c_str());
-      }
-    }
-
-    return {};
+    return mapped_file_name.data();
   }
 
-  return mapped_file_name.data();
+  DWORD const last_error = ::GetLastError();
+  HADESMEM_DETAIL_TRACE_FORMAT_A(
+    "WARNING! GetMappedFileNameW failed. LastError: [%08lX].", last_error);
+
+  // TODO: Instead of a config flag, is there a better solution to this problem
+  // that doesn't involve guessing?
+  if (use_original_image_path && p == imagebase)
+  {
+    try
+    {
+      return hadesmem::GetPathNative(process);
+    }
+    catch (...)
+    {
+      HADESMEM_DETAIL_TRACE_FORMAT_A("WARNING! Failed to get default path.");
+      HADESMEM_DETAIL_TRACE_A(
+        boost::current_exception_diagnostic_information().c_str());
+    }
+  }
+
+  return {};
 }
 
 // TODO: Support files mapped from UNC shares? Any other corner cases?
@@ -783,13 +785,11 @@ private:
     return section_datas;
   }
 
-  void FixSectionHeaders(Process const& local_process,
-                         PeFile const& pe_file_new,
+  void FixSectionHeaders(SectionList& sections_new,
                          std::vector<SectionData> const& section_datas)
   {
     HADESMEM_DETAIL_TRACE_A("Fixing section headers.");
 
-    SectionList sections_new(local_process, pe_file_new);
     std::size_t n = 0;
     for (auto& section : sections_new)
     {
@@ -1001,16 +1001,15 @@ private:
     return fixup_map;
   }
 
-  std::vector<std::uint8_t>
-    CopyHeaders(NtHeaders const& nt_headers,
-                std::size_t pe_size,
-                bool has_disk_headers,
-                std::vector<std::uint8_t> const& raw,
-                std::vector<char> const& pe_file_disk_data)
+  void CopyHeaders(std::vector<std::uint8_t>& raw_new,
+                   NtHeaders const& nt_headers,
+                   std::size_t pe_size,
+                   bool has_disk_headers,
+                   std::vector<std::uint8_t> const& raw,
+                   std::vector<char> const& pe_file_disk_data)
   {
     HADESMEM_DETAIL_TRACE_A("Copying headers.");
 
-    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
     // TODO: Fix this hack properly. We reserve plenty of size in the buffer so
     // when we open the PE file object later pointing to the buffer, if we add
     // more data to the buffer it won't be reallocated.
@@ -1022,8 +1021,6 @@ private:
     std::copy(headers_buf_beg,
               headers_buf_beg + nt_headers.GetSizeOfHeaders(),
               raw_new.data());
-
-    return raw_new;
   }
 
   std::tuple<bool, std::vector<char>, std::unique_ptr<PeFile>>
@@ -1123,12 +1120,14 @@ private:
     PeFile const& pe_file_headers = *pe_file_headers_ptr;
     NtHeaders nt_headers(local_process, pe_file_headers);
 
-    auto raw_new = CopyHeaders(
-      nt_headers, pe_size, has_disk_headers, raw, pe_file_disk_data);
+    std::vector<std::uint8_t> raw_new(nt_headers.GetSizeOfHeaders());
+    CopyHeaders(
+      raw_new, nt_headers, pe_size, has_disk_headers, raw, pe_file_disk_data);
 
     auto const section_datas =
       CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
 
+    auto const orig_raw_new_ptr = raw_new.data();
     HADESMEM_DETAIL_ASSERT(raw_new.size() <
                            (std::numeric_limits<DWORD>::max)());
     PeFile const pe_file_new(local_process,
@@ -1144,8 +1143,10 @@ private:
                    base,
                    has_disk_headers,
                    (has_disk_headers ? pe_file_headers_ptr : pe_file_none));
+    HADESMEM_DETAIL_ASSERT(orig_raw_new_ptr == raw_new.data());
 
-    FixSectionHeaders(local_process, pe_file_new, section_datas);
+    SectionList sections_new(local_process, pe_file_new);
+    FixSectionHeaders(sections_new, section_datas);
 
     if (!!(flags_ & DumpFlags::kReconstructImports))
     {
@@ -1155,7 +1156,6 @@ private:
         TryAddNewSection(local_process, pe_file_new, nt_headers_new, raw_new);
 
       std::vector<Section> sections_vec;
-      SectionList sections_new(local_process, pe_file_new);
       std::copy(std::begin(sections_new),
                 std::end(sections_new),
                 std::back_inserter(sections_vec));
@@ -1175,7 +1175,7 @@ private:
         raw_new, export_map, base, pe_size, local_process, pe_file_new);
 
       auto coalesced_fixup_map = CoalesceImportDescriptors(fixup_map);
-
+      
       // TODO: Figure out why IDA doesn't like our import tables sometimes. It
       // shows the import fine in the disassembly view (including name, xrefs,
       // etc) but not in the imports tab. It seems to happen when we have
@@ -1254,23 +1254,33 @@ private:
   {
     HADESMEM_DETAIL_TRACE_A("Adding new import directories to file.");
 
-    // Expand last section to its previous virtual end.
-    raw_new.resize(last_section.GetPointerToRawData() + old_section_end);
+    auto const prev_virt_end =
+      last_section.GetPointerToRawData() + old_section_end;
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Expanding last section to its previous "
+                                   "virtual size. New End: [0x%lX].",
+                                   prev_virt_end);
+    raw_new.resize(prev_virt_end);
 
     (void)raw_new_capacity;
     HADESMEM_DETAIL_ASSERT(raw_new.capacity() == raw_new_capacity);
 
-    // Append our new data after the old virtual end.
-    raw_new.reserve(raw_new.size() + (new_size - old_size));
+    auto const new_end = raw_new.size() + (new_size - old_size);
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Appending new data after old virtual end. New End: [0x%IX].", new_end);
+    raw_new.reserve(new_end);
+
+    HADESMEM_DETAIL_ASSERT(raw_new.capacity() == raw_new_capacity);
+
     std::copy(std::begin(import_directories_buf),
               std::end(import_directories_buf),
               std::back_inserter(raw_new));
 
     HADESMEM_DETAIL_ASSERT(raw_new.capacity() == raw_new_capacity);
 
-    // Expand to new size (because it's section aligned).
     auto const new_raw_size =
       last_section.GetPointerToRawData() + last_section.GetSizeOfRawData();
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "Expanding to section aligned size. New End: [0x%lX].", new_raw_size);
     raw_new.resize(new_raw_size);
 
     HADESMEM_DETAIL_ASSERT(raw_new.capacity() == raw_new_capacity);
@@ -1669,15 +1679,14 @@ private:
       std::distance(std::begin(import_thunks_oft), std::end(import_thunks_oft));
     auto const num_new_existing_imports =
       (std::min)(num_fts, num_ofts ? num_ofts : num_fts);
-    HADESMEM_DETAIL_TRACE_FORMAT_A("Adding %d existing imports.");
+    HADESMEM_DETAIL_TRACE_FORMAT_A("Adding %d existing imports.",
+                                   num_new_existing_imports);
     num_existing_imports += num_new_existing_imports;
 
     auto const p = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(dir.GetBase());
-
     std::copy(reinterpret_cast<char const*>(p),
               reinterpret_cast<char const*>(p) + sizeof(*p),
               &import_directories_buf[descriptors_cur]);
-
     descriptors_cur += sizeof(IMAGE_IMPORT_DESCRIPTOR);
   }
 
