@@ -1092,8 +1092,6 @@ private:
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "Starting module dumping. Base: [%p]. Size: [%X].", base, pe_size);
 
-    HADESMEM_DETAIL_TRACE_A("Reading memory.");
-
     auto raw = ReadVectorEx<std::uint8_t>(
       *process_, base, pe_size, ReadFlags::kZeroFillReserved);
     Process const local_process(::GetCurrentProcessId());
@@ -1127,7 +1125,6 @@ private:
     auto const section_datas =
       CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
 
-    auto const orig_raw_new_ptr = raw_new.data();
     HADESMEM_DETAIL_ASSERT(raw_new.size() <
                            (std::numeric_limits<DWORD>::max)());
     PeFile const pe_file_new(local_process,
@@ -1143,7 +1140,6 @@ private:
                    base,
                    has_disk_headers,
                    (has_disk_headers ? pe_file_headers_ptr : pe_file_none));
-    HADESMEM_DETAIL_ASSERT(orig_raw_new_ptr == raw_new.data());
 
     SectionList sections_new(local_process, pe_file_new);
     FixSectionHeaders(sections_new, section_datas);
