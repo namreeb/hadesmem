@@ -319,10 +319,10 @@ void DumpImports(hadesmem::Process const& process,
     // Assume that any PE files mapped as images in memory have had their
     // imports resolved.
     bool const is_memory_bound =
-      (pe_file.GetType() == hadesmem::PeFileType::Image) && !use_ilt;
+      (pe_file.GetType() == hadesmem::PeFileType::kImage) && !use_ilt;
     bool const is_ilt_bound = (is_bound && !use_ilt) || is_memory_bound;
     bool const is_iat_bound =
-      is_bound || (pe_file.GetType() == hadesmem::PeFileType::Image);
+      is_bound || (pe_file.GetType() == hadesmem::PeFileType::kImage);
     std::size_t count = 0U;
     for (auto const& thunk : ilt_thunks)
     {
@@ -345,7 +345,7 @@ void DumpImports(hadesmem::Process const& process,
       // original name/ordinal inforamtion is long gone so all we have to work
       // from in the IAT (which is bound).
       bool const is_image_iat =
-        (pe_file.GetType() == hadesmem::PeFileType::Image && !use_ilt);
+        (pe_file.GetType() == hadesmem::PeFileType::kImage && !use_ilt);
       DumpImportThunk(thunk, is_image_iat);
     }
 

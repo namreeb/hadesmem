@@ -73,6 +73,12 @@ public:
       detour_{detour},
       context_(std::move(context))
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"PatchIat only supported on local process."});
+    }
+
     hadesmem::ModuleList const modules{process};
     for (auto const& m : modules)
     {
@@ -178,7 +184,7 @@ private:
   void HookModule(Module const& m)
   {
     hadesmem::PeFile const pe_file{
-      *process_, m.GetHandle(), hadesmem::PeFileType::Image, 0};
+      *process_, m.GetHandle(), hadesmem::PeFileType::kImage, 0};
 
     auto const cur_mod_name = detail::ToUpperOrdinal(m.GetName());
     if (cur_mod_name == module_)

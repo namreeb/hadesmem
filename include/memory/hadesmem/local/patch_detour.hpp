@@ -101,6 +101,11 @@ public:
       context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"PatchDetour only supported on local process."});
+    }
   }
 
   explicit PatchDetour(Process const&& process,
@@ -278,8 +283,7 @@ public:
       {
         std::uint16_t const size = is_jimm ? op->size : op->offset;
         HADESMEM_DETAIL_TRACE_FORMAT_A("Operand/offset size is %hu.", size);
-        std::int64_t const insn_target = [&]() -> std::int64_t
-        {
+        std::int64_t const insn_target = [&]() -> std::int64_t {
           switch (size)
           {
           case sizeof(std::int8_t) * CHAR_BIT:
@@ -298,12 +302,11 @@ public:
         }();
 
         auto const resolve_rel =
-          [](std::uint64_t base, std::int64_t target, std::uint32_t insn_len)
-        {
-          return reinterpret_cast<std::uint8_t*>(
-                   static_cast<std::uintptr_t>(base)) +
-                 target + insn_len;
-        };
+          [](std::uint64_t base, std::int64_t target, std::uint32_t insn_len) {
+            return reinterpret_cast<std::uint8_t*>(
+                     static_cast<std::uintptr_t>(base)) +
+                   target + insn_len;
+          };
 
         std::uint64_t const insn_base = ud_insn_off(&ud_obj);
         std::uint32_t const insn_len = ud_insn_len(&ud_obj);

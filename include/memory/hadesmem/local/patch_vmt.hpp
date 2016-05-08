@@ -39,6 +39,12 @@ public:
       vmt_size_{vmt_size},
       new_vmt_{process, vmt_size_ * sizeof(void*) + 1}
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{ "PatchVmt only supported on local process." });
+    }
+
     Initialize();
   }
 

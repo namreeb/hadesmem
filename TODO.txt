@@ -18,6 +18,7 @@
 * Add functions for getting PEB/TEB/etc.
 * Add back ManualMap, Scanner, Disassembler, Symbols, etc.
 * Write memory editing tool (similer to Cheat Engine, CrySearch, MHS, etc.).
+* Add Cerberus extension to control memory editing tool from in-game.
 * Assert all preconditions, postconditions, and invariants.
 * Add remote code emulator.
 * Fix all strict aliasing violations.

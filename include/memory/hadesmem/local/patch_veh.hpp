@@ -55,13 +55,6 @@ public:
                     DetourFuncT const& detour)
     : PatchDetour{process, target, detour}
   {
-    if (process.GetId() != ::GetCurrentProcessId())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{
-          "VEH based hooks on remote processes are currently unsupported."});
-    }
-
     Initialize();
   }
 

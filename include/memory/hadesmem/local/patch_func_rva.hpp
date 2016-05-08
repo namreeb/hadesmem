@@ -45,6 +45,12 @@ public:
       context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{
+          "PatchFuncRva only supported on local process."});
+    }
   }
 
   explicit PatchFuncRva(Process const&& process,

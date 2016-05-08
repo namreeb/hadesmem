@@ -112,8 +112,7 @@ protected:
     HADESMEM_DETAIL_ASSERT(veh_hooks.find(target_) == std::end(veh_hooks));
     veh_hooks[target_] = this;
 
-    auto const veh_cleanup_hook = [&]()
-    {
+    auto const veh_cleanup_hook = [&]() {
       auto const veh_hooks_removed = veh_hooks.erase(target_);
       (void)veh_hooks_removed;
       HADESMEM_DETAIL_ASSERT(veh_hooks_removed);
@@ -153,10 +152,9 @@ protected:
         Error{} << ErrorString{"No free debug registers."});
     }
 
-    dr_hooks[ ::GetCurrentThreadId()] = dr_index;
+    dr_hooks[::GetCurrentThreadId()] = dr_index;
 
-    auto const dr_cleanup_hook = [&]()
-    {
+    auto const dr_cleanup_hook = [&]() {
       auto const dr_hooks_removed = dr_hooks.erase(::GetCurrentThreadId());
       (void)dr_hooks_removed;
       HADESMEM_DETAIL_ASSERT(dr_hooks_removed);

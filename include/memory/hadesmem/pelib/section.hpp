@@ -41,42 +41,7 @@ public:
   {
     if (base_ == nullptr)
     {
-      NtHeaders const nt_headers(process, pe_file);
-      if (!nt_headers.GetNumberOfSections())
-      {
-        HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error{} << ErrorString{"Image nas no sections."});
-      }
-
-      if (pe_file_->Is64())
-      {
-        base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
-                offsetof(IMAGE_NT_HEADERS64, OptionalHeader) +
-                nt_headers.GetSizeOfOptionalHeader();
-      }
-      else
-      {
-        base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
-                offsetof(IMAGE_NT_HEADERS32, OptionalHeader) +
-                nt_headers.GetSizeOfOptionalHeader();
-      }
-    }
-
-    // TODO: Does GetBase need to be adjusted for virtual sections?
-    void const* const file_end =
-      static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
-    void const* const section_hdr_next =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(base_) + 1;
-    if (pe_file.GetType() == PeFileType::Data && section_hdr_next > file_end)
-    {
-      // TODO: Support partial overlap by actually reading as much as we can,
-      // rather than just setting everything to zero.
-      is_virtual_ = true;
-      ::ZeroMemory(&data_, sizeof(data_));
-    }
-    else
-    {
-      UpdateRead();
+      Initialize(0);
     }
   }
 
@@ -85,50 +50,7 @@ public:
   explicit Section(Process const& process, PeFile const& pe_file, WORD index)
     : process_{&process}, pe_file_{&pe_file}, base_{nullptr}
   {
-    NtHeaders const nt_headers(process, pe_file);
-    if (!nt_headers.GetNumberOfSections())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                      << ErrorString{"Image nas no sections."});
-    }
-
-    if (index >= nt_headers.GetNumberOfSections())
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                      << ErrorString{"Invalid section index."});
-    }
-
-    if (pe_file_->Is64())
-    {
-      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
-              offsetof(IMAGE_NT_HEADERS64, OptionalHeader) +
-              nt_headers.GetSizeOfOptionalHeader() +
-              (sizeof(IMAGE_SECTION_HEADER) * index);
-    }
-    else
-    {
-      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
-              offsetof(IMAGE_NT_HEADERS32, OptionalHeader) +
-              nt_headers.GetSizeOfOptionalHeader() +
-              (sizeof(IMAGE_SECTION_HEADER) * index);
-    }
-
-    // TODO: Does GetBase need to be adjusted for virtual sections?
-    void const* const file_end =
-      static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
-    void const* const section_hdr_next =
-      reinterpret_cast<PIMAGE_SECTION_HEADER>(base_) + 1;
-    if (pe_file.GetType() == PeFileType::Data && section_hdr_next > file_end)
-    {
-      // TODO: Support partial overlap by actually reading as much as we can,
-      // rather than just setting everything to zero.
-      is_virtual_ = true;
-      ::ZeroMemory(&data_, sizeof(data_));
-    }
-    else
-    {
-      UpdateRead();
-    }
+    Initialize(index);
   }
 
   explicit Section(Process const&& process,
@@ -286,6 +208,54 @@ public:
 
 private:
   template <typename SectionT> friend class SectionIterator;
+
+  void Initialize(WORD index)
+  {
+    NtHeaders const nt_headers(*process_, *pe_file_);
+    if (!nt_headers.GetNumberOfSections())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Image nas no sections."});
+    }
+
+    if (index >= nt_headers.GetNumberOfSections())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
+                                      << ErrorString{"Invalid section index."});
+    }
+
+    if (pe_file_->Is64())
+    {
+      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
+              offsetof(IMAGE_NT_HEADERS64, OptionalHeader) +
+              nt_headers.GetSizeOfOptionalHeader() +
+              (sizeof(IMAGE_SECTION_HEADER) * index);
+    }
+    else
+    {
+      base_ = static_cast<PBYTE>(nt_headers.GetBase()) +
+              offsetof(IMAGE_NT_HEADERS32, OptionalHeader) +
+              nt_headers.GetSizeOfOptionalHeader() +
+              (sizeof(IMAGE_SECTION_HEADER) * index);
+    }
+
+    // TODO: Does GetBase need to be adjusted for virtual sections?
+    void const* const file_end =
+      static_cast<std::uint8_t*>(pe_file_->GetBase()) + pe_file_->GetSize();
+    void const* const section_hdr_next =
+      reinterpret_cast<PIMAGE_SECTION_HEADER>(base_) + 1;
+    if (pe_file_->GetType() == PeFileType::kData && section_hdr_next > file_end)
+    {
+      // TODO: Support partial overlap by actually reading as much as we can,
+      // rather than just setting everything to zero.
+      is_virtual_ = true;
+      ::ZeroMemory(&data_, sizeof(data_));
+    }
+    else
+    {
+      UpdateRead();
+    }
+  }
 
   Process const* process_;
   PeFile const* pe_file_;

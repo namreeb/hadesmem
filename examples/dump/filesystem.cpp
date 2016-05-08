@@ -48,7 +48,7 @@ void DumpFile(std::wstring const& path)
 
     hadesmem::PeFile const pe_file(process,
                                    buf.data(),
-                                   hadesmem::PeFileType::Data,
+                                   hadesmem::PeFileType::kData,
                                    static_cast<DWORD>(buf.size()));
 
     try
@@ -84,8 +84,7 @@ void DumpDir(std::wstring const& path, hadesmem::detail::ThreadPool& pool)
   WriteNewline(out);
   WriteNormal(out, L"Entering dir: \"" + path + L"\".", 0);
 
-  auto const f = [&](std::wstring const& cur_file)
-  {
+  auto const f = [&](std::wstring const& cur_file) {
     std::wstring const cur_path = hadesmem::detail::MakeExtendedPath(
       hadesmem::detail::CombinePath(path, cur_file));
 
@@ -108,10 +107,7 @@ void DumpDir(std::wstring const& path, hadesmem::detail::ThreadPool& pool)
       }
       else
       {
-        auto const task = [cur_path]()
-        {
-          DumpFile(cur_path);
-        };
+        auto const task = [cur_path]() { DumpFile(cur_path); };
 
         do
         {

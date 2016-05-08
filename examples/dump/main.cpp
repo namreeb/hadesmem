@@ -179,10 +179,7 @@ thread_local std::wstring g_current_file_path;
 // TODO: Clean up global state.
 bool g_quiet = false;
 bool g_strings = false;
-bool g_use_disk_headers = false;
-bool g_use_original_image_path = false;
-bool g_reconstruct_imports = false;
-bool g_add_new_section = false;
+std::uint32_t g_flags = hadesmem::detail::DumpFlags::kNone;
 DWORD g_oep = 0;
 std::wstring g_module_name;
 std::uintptr_t g_module_base = 0;
@@ -247,7 +244,7 @@ void DumpModules(hadesmem::Process const& process)
     WriteNamedNormal(out, L"Path", module.GetPath(), 1);
 
     hadesmem::PeFile const pe_file(
-      process, module.GetHandle(), hadesmem::PeFileType::Image, 0);
+      process, module.GetHandle(), hadesmem::PeFileType::kImage, 0);
 
     try
     {
@@ -354,10 +351,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
   if (g_raw_base)
   {
     hadesmem::detail::DumpMemory(*process,
-                                 g_use_disk_headers,
-                                 g_use_original_image_path,
-                                 g_reconstruct_imports,
-                                 g_add_new_section,
+                                 g_flags,
                                  g_oep,
                                  nullptr,
                                  reinterpret_cast<void*>(g_raw_base),
@@ -380,13 +374,7 @@ void DumpProcessEntry(hadesmem::ProcessEntry const& process_entry,
       return nullptr;
     }();
 
-    hadesmem::detail::DumpMemory(*process,
-                                 g_use_disk_headers,
-                                 g_use_original_image_path,
-                                 g_reconstruct_imports,
-                                 g_add_new_section,
-                                 g_oep,
-                                 module_base);
+    hadesmem::detail::DumpMemory(*process, g_flags, g_oep, module_base);
   }
 }
 
@@ -648,10 +636,18 @@ int main(int argc, char* argv[])
 
     g_quiet = quiet_arg.isSet();
     g_strings = strings_arg.isSet();
-    g_use_disk_headers = use_disk_headers_arg.isSet();
-    g_use_original_image_path = use_original_image_path_arg.isSet();
-    g_reconstruct_imports = reconstruct_imports_arg.isSet();
-    g_add_new_section = add_new_section_arg.isSet();
+    g_flags |= use_disk_headers_arg.isSet()
+                 ? hadesmem::detail::DumpFlags::kUseDiskHeaders
+                 : 0;
+    g_flags |= use_original_image_path_arg.isSet()
+                 ? hadesmem::detail::DumpFlags::kUseOriginalImagePath
+                 : 0;
+    g_flags |= reconstruct_imports_arg.isSet()
+                 ? hadesmem::detail::DumpFlags::kReconstructImports
+                 : 0;
+    g_flags |= add_new_section_arg.isSet()
+                 ? hadesmem::detail::DumpFlags::kAddNewSection
+                 : 0;
     g_oep = oep_arg.getValue();
     g_module_name =
       hadesmem::detail::MultiByteToWideChar(module_name_arg.getValue());

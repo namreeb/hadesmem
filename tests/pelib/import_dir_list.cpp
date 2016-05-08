@@ -35,7 +35,7 @@ void TestImportDirList()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::kImage, 0);
 
   bool processed_one_import_dir = false;
 
@@ -43,7 +43,7 @@ void TestImportDirList()
   for (auto const& mod : modules)
   {
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
+      process, mod.GetHandle(), hadesmem::PeFileType::kImage, 0);
 
     hadesmem::ImportDirList import_dirs(process, cur_pe_file);
     if (mod.GetHandle() == GetModuleHandle(nullptr))
@@ -52,21 +52,22 @@ void TestImportDirList()
 
       auto iter = std::find_if(std::begin(import_dirs),
                                std::end(import_dirs),
-                               [](hadesmem::ImportDir const& i)
-                               {
-        return i.GetName() == "kernel32" || i.GetName() == "kernel32.dll" ||
-               i.GetName() == "KERNEL32.dll" || i.GetName() == "KERNEL32.DLL";
-      });
+                               [](hadesmem::ImportDir const& i) {
+                                 return i.GetName() == "kernel32" ||
+                                        i.GetName() == "kernel32.dll" ||
+                                        i.GetName() == "KERNEL32.dll" ||
+                                        i.GetName() == "KERNEL32.DLL";
+                               });
       BOOST_TEST(iter != std::end(import_dirs));
 
       hadesmem::ImportThunkList import_thunks(
         process, cur_pe_file, iter->GetOriginalFirstThunk());
-      auto iter2 = std::find_if(std::begin(import_thunks),
-                                std::end(import_thunks),
-                                [](hadesmem::ImportThunk const& i)
-                                {
-        return i.ByOrdinal() ? false : i.GetName() == "GetCurrentProcessId";
-      });
+      auto iter2 = std::find_if(
+        std::begin(import_thunks),
+        std::end(import_thunks),
+        [](hadesmem::ImportThunk const& i) {
+          return i.ByOrdinal() ? false : i.GetName() == "GetCurrentProcessId";
+        });
       BOOST_TEST(iter2 != std::end(import_thunks));
     }
     for (auto const& d : import_dirs)

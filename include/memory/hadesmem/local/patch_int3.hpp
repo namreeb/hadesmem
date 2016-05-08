@@ -96,10 +96,7 @@ protected:
       veh_hooks[target_] = this;
     }
 
-    auto const cleanup_hook = [&]()
-    {
-      veh_hooks.erase(target_);
-    };
+    auto const cleanup_hook = [&]() { veh_hooks.erase(target_); };
     auto scope_cleanup_hook = hadesmem::detail::MakeScopeWarden(cleanup_hook);
 
     HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");

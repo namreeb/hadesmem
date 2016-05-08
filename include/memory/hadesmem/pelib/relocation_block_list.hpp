@@ -70,7 +70,7 @@ public:
       auto const file_end =
         static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();
       // Sample: virtrelocXP.exe
-      if (pe_file.GetType() == PeFileType::Data &&
+      if (pe_file.GetType() == PeFileType::kData &&
           (reloc_dir_end < base || reloc_dir_end > file_end))
       {
         return;

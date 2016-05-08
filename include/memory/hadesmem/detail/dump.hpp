@@ -37,6 +37,8 @@
 
 // TODO: Clean this up. It's a mess right now...
 
+// TODO: Harden PE format parsing.
+
 namespace hadesmem
 {
 namespace detail
@@ -276,7 +278,7 @@ struct ModuleLight
               void* imagebase,
               bool use_original_image_path)
     : process_{process},
-      pe_file_{process_, base, PeFileType::Image, static_cast<DWORD>(size)},
+      pe_file_{process_, base, PeFileType::kImage, static_cast<DWORD>(size)},
       path_{GetRegionPath(process, base, imagebase, use_original_image_path)},
       name_{MakeNameFromPath(path_)},
       priority_{GetModulePriority(name_, path_)}
@@ -318,7 +320,7 @@ struct ModuleLight
       Process local_process{::GetCurrentProcessId()};
       PeFile pe_file{local_process,
                      buffer.data(),
-                     PeFileType::Data,
+                     PeFileType::kData,
                      static_cast<DWORD>(buffer.size())};
       NtHeaders nt_headers{local_process, pe_file};
       return true;
@@ -368,18 +370,12 @@ struct PeDumper
 public:
   PeDumper(Process const& process,
            void* base,
-           bool use_disk_headers,
-           bool use_original_image_path,
-           bool reconstruct_imports,
-           bool add_new_section,
+           std::uint32_t flags,
            DWORD oep,
            ModuleLight const* m = nullptr)
     : process_{&process},
       base_{base},
-      use_disk_headers_{use_disk_headers},
-      use_original_image_path_{use_original_image_path},
-      reconstruct_imports_{reconstruct_imports},
-      add_new_section_{add_new_section},
+      flags_{flags},
       oep_{oep},
       m_{m},
       process_light_(MakeProcessLight())
@@ -482,12 +478,13 @@ private:
     {
       HADESMEM_DETAIL_TRACE_A("Checking for valid headers, and retrieving "
                               "region name and optional path.");
-      process_info.modules_.emplace_back(*process_,
-                                         p,
-                                         size,
-                                         use_disk_headers_,
-                                         peb.ImageBaseAddress,
-                                         use_original_image_path_);
+      process_info.modules_.emplace_back(
+        *process_,
+        p,
+        size,
+        !!(flags_ & DumpFlags::kUseDiskHeaders),
+        peb.ImageBaseAddress,
+        !!(flags_ & DumpFlags::kUseOriginalImagePath));
     }
     catch (...)
     {
@@ -500,7 +497,7 @@ private:
 
   void BuildExportMap(ProcessLight& process_info)
   {
-    if (!reconstruct_imports_)
+    if (!(flags_ & DumpFlags::kReconstructImports))
     {
       HADESMEM_DETAIL_TRACE_A("Skipping export map generation because import "
                               "reconstruction is disabled.");
@@ -606,9 +603,9 @@ private:
             // Quiet debug spew for some expected/intentional failures.
             if (hadesmem::detail::ToUpperOrdinal(m.name_) == L"SHUNIMPL.DLL")
             {
-              HADESMEM_DETAIL_TRACE_FORMAT_W("Ignoring expected failure "
-                                             "resolving forwarded export. "
-                                             "Module: [%s]. Name: [%hs].",
+              HADESMEM_DETAIL_TRACE_FORMAT_W(L"Ignoring expected failure "
+                                             L"resolving forwarded export. "
+                                             L"Module: [%s]. Name: [%hs].",
                                              m.name_.c_str(),
                                              e.GetName().c_str());
               continue;
@@ -745,9 +742,6 @@ private:
 
       section_datas.emplace_back(
         SectionData{ptr_raw_data_new, section_size, section_size});
-
-      // TODO: Actually validate we're not going to read outside of the buffer?
-      // TODO: Everywhere else in this function needs hardening too.
 
       if (section.GetVirtualAddress() >= raw.size())
       {
@@ -957,13 +951,7 @@ private:
         }
       }
 
-      auto const fixup = fixup_map.find(rva);
-      // TODO: Should this be impossible?
-      if (fixup != std::end(fixup_map))
-      {
-        HADESMEM_DETAIL_TRACE_A("WARNING! Skipping duplicate RVA.");
-        continue;
-      }
+      HADESMEM_DETAIL_ASSERT(fixup_map.find(rva) == std::end(fixup_map));
 
       // Modules are sorted by priority. Lowest to highest.
       auto& fixup_export = fixup_map[rva];
@@ -1066,7 +1054,7 @@ private:
       auto pe_file_disk =
         std::make_unique<PeFile>(local_process,
                                  pe_file_disk_data.data(),
-                                 PeFileType::Data,
+                                 PeFileType::kData,
                                  static_cast<DWORD>(pe_file_disk_data.size()));
       return std::make_tuple(
         true, std::move(pe_file_disk_data), std::move(pe_file_disk));
@@ -1114,10 +1102,10 @@ private:
     Process const local_process(::GetCurrentProcessId());
     PeFile const pe_file(local_process,
                          raw.data(),
-                         PeFileType::Image,
+                         PeFileType::kImage,
                          static_cast<DWORD>(raw.size()));
 
-    bool has_disk_headers = use_disk_headers_;
+    bool has_disk_headers = !!(flags_ & DumpFlags::kUseDiskHeaders);
 
     auto const& region_path = m->path_;
     if (region_path.empty())
@@ -1126,8 +1114,6 @@ private:
         "WARNING! No region path, not attempting to use disk headers.");
       has_disk_headers = false;
     }
-
-    // TODO: Don't hard-fail if we request disk headers but can't get them?
 
     std::vector<char> pe_file_disk_data;
     std::unique_ptr<PeFile> pe_file_headers_ptr;
@@ -1147,7 +1133,7 @@ private:
                            (std::numeric_limits<DWORD>::max)());
     PeFile const pe_file_new(local_process,
                              raw_new.data(),
-                             PeFileType::Data,
+                             PeFileType::kData,
                              static_cast<DWORD>(raw_new.size()));
     auto const raw_new_capacity = raw_new.capacity();
 
@@ -1161,7 +1147,7 @@ private:
 
     FixSectionHeaders(local_process, pe_file_new, section_datas);
 
-    if (reconstruct_imports_)
+    if (!!(flags_ & DumpFlags::kReconstructImports))
     {
       HADESMEM_DETAIL_TRACE_A("Reconstructing imports.");
 
@@ -1205,8 +1191,7 @@ private:
 
       ReaddFilteredImports(old_coalesced_fixup_map, coalesced_fixup_map);
 
-      // TODO: Sort fixup map by Name RVA (of the module descriptor)? That seems
-      // to be how MSVC is ordering them. Double check that though.
+      // TODO: Try and sort our import directory the same way MSVC would.
 
       std::vector<char> import_directories_buf;
       DWORD descriptors_cur = 0;
@@ -1224,8 +1209,6 @@ private:
                             coalesced_fixup_map,
                             import_directories_buf,
                             descriptors_cur);
-
-      // TODO: Should we just bail here if import_directories_buf is empty?
 
       auto const new_size = UpdateLastSectionSize(
         import_directories_buf, nt_headers_new, old_section_end, last_section);
@@ -1274,6 +1257,7 @@ private:
     // Expand last section to its previous virtual end.
     raw_new.resize(last_section.GetPointerToRawData() + old_section_end);
 
+    (void)raw_new_capacity;
     HADESMEM_DETAIL_ASSERT(raw_new.capacity() == raw_new_capacity);
 
     // Append our new data after the old virtual end.
@@ -1499,6 +1483,7 @@ private:
                           PIMAGE_THUNK_DATA& thunks,
                           std::size_t& num_imports)
   {
+    (void)module_name;
     HADESMEM_DETAIL_TRACE_FORMAT_W(
       L"Processing import reconstruction entry. RVA: [%08lX]. Module: "
       L"[%s]. Name: [%hs]. Ordinal: [%lu]. ByName: [%d].",
@@ -1569,7 +1554,7 @@ private:
                         NtHeaders& nt_headers_new,
                         std::vector<std::uint8_t> const& raw_new)
   {
-    if (!add_new_section_)
+    if (!(flags_ & DumpFlags::kAddNewSection))
     {
       return false;
     }
@@ -1889,10 +1874,7 @@ private:
 
   Process const* process_{};
   void* base_{};
-  bool use_disk_headers_{};
-  bool use_original_image_path_{};
-  bool reconstruct_imports_{};
-  bool add_new_section_{};
+  std::uint32_t flags_{};
   DWORD oep_{};
   ModuleLight const* m_{};
 
@@ -1912,10 +1894,7 @@ inline void
 
 inline void
   DumpMemory(Process const& process = Process(::GetCurrentProcessId()),
-             bool use_disk_headers = false,
-             bool use_original_image_path = false,
-             bool reconstruct_imports = false,
-             bool add_new_section = false,
+             std::uint32_t flags = DumpFlags::kNone,
              DWORD oep = 0,
              void* module_base = nullptr,
              void* base = nullptr,
@@ -1929,13 +1908,7 @@ inline void
   {
     // TODO: What happens vs targets which unmap themselves when we specify not
     // to fall back to the original image path (e.g. Overwatch, some malware).
-    PeDumper dumper(process,
-                    module_base,
-                    use_disk_headers,
-                    use_original_image_path,
-                    reconstruct_imports,
-                    add_new_section,
-                    oep);
+    PeDumper dumper(process, module_base, flags, oep);
     dumper.Dump();
   }
 }

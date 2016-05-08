@@ -101,13 +101,12 @@
 
 namespace hadesmem
 {
-// TODO: 'k' prefix.
 // TODO: Investigate if there is a better way to implement PeLib rather than
 // branching on PeFileType everywhere.
 enum class PeFileType
 {
-  Image,
-  Data
+  kImage,
+  kData
 };
 
 class PeFile
@@ -123,13 +122,13 @@ public:
       size_{size}
   {
     HADESMEM_DETAIL_ASSERT(base_ != 0);
-    if (type == PeFileType::Data && !size)
+    if (type == PeFileType::kData && !size)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                       << ErrorString{"Invalid file size."});
     }
 
-    if (type == PeFileType::Image && !size)
+    if (type == PeFileType::kImage && !size)
     {
       try
       {
@@ -270,7 +269,7 @@ inline PVOID RvaToVa(Process const& process,
   PeFileType const type = pe_file.GetType();
   PBYTE base = static_cast<PBYTE>(pe_file.GetBase());
 
-  if (type == PeFileType::Data)
+  if (type == PeFileType::kData)
   {
     if (!rva)
     {
@@ -407,7 +406,7 @@ inline PVOID RvaToVa(Process const& process,
         // PE loader due to the sections being mapped differention in memory
         // to on disk, but if you want to inspect the file in that manner you
         // should just use LoadLibrary with the appropriate flags for your
-        // scenario and then use PeFileType::Image.
+        // scenario and then use PeFileType::kImage.
         if (rva > raw_size)
         {
           // It's useful to be able to detect this case as a user for things
@@ -483,7 +482,7 @@ inline PVOID RvaToVa(Process const& process,
 
     return nullptr;
   }
-  else if (type == PeFileType::Image)
+  else if (type == PeFileType::kImage)
   {
     return rva ? (base + rva) : nullptr;
   }
@@ -503,7 +502,7 @@ inline DWORD FileOffsetToRva(Process const& process,
   PeFileType const type = pe_file.GetType();
   PBYTE base = static_cast<PBYTE>(pe_file.GetBase());
 
-  if (type == PeFileType::Data)
+  if (type == PeFileType::kData)
   {
     IMAGE_DOS_HEADER dos_header = Read<IMAGE_DOS_HEADER>(process, base);
     if (dos_header.e_magic != IMAGE_DOS_SIGNATURE)
@@ -547,7 +546,7 @@ inline DWORD FileOffsetToRva(Process const& process,
 
     return 0;
   }
-  else if (type == PeFileType::Image)
+  else if (type == PeFileType::kImage)
   {
     return file_offset;
   }
@@ -568,14 +567,14 @@ std::basic_string<CharT> CheckedReadString(Process const& process,
                                            PeFile const& pe_file,
                                            void* address)
 {
-  if (pe_file.GetType() == PeFileType::Image)
+  if (pe_file.GetType() == PeFileType::kImage)
   {
     // TODO: Extra bounds checking to ensure we don't read outside the image in
     // the case that we're reading a string at the end of the file which is not
     // null terminated, and we're on a region boundary.
     return ReadString<CharT>(process, address);
   }
-  else if (pe_file.GetType() == PeFileType::Data)
+  else if (pe_file.GetType() == PeFileType::kData)
   {
     void* const file_end =
       static_cast<std::uint8_t*>(pe_file.GetBase()) + pe_file.GetSize();

@@ -592,13 +592,15 @@ public:
 
     if (pe_file_->Is64())
     {
-      return data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                     data_dir)].VirtualAddress;
+      return data_64_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .VirtualAddress;
     }
     else
     {
-      return data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                     data_dir)].VirtualAddress;
+      return data_32_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .VirtualAddress;
     }
   }
 
@@ -612,13 +614,15 @@ public:
 
     if (pe_file_->Is64())
     {
-      return data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                     data_dir)].Size;
+      return data_64_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .Size;
     }
     else
     {
-      return data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                                     data_dir)].Size;
+      return data_32_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .Size;
     }
   }
 
@@ -1100,15 +1104,15 @@ public:
 
     if (pe_file_->Is64())
     {
-      data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                              data_dir)].VirtualAddress =
-        data_directory_virtual_address;
+      data_64_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .VirtualAddress = data_directory_virtual_address;
     }
     else
     {
-      data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                              data_dir)].VirtualAddress =
-        data_directory_virtual_address;
+      data_32_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .VirtualAddress = data_directory_virtual_address;
     }
   }
 
@@ -1122,15 +1126,15 @@ public:
 
     if (pe_file_->Is64())
     {
-      data_64_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                              data_dir)].Size =
-        data_directory_size;
+      data_64_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .Size = data_directory_size;
     }
     else
     {
-      data_32_.OptionalHeader.DataDirectory[static_cast<std::uint32_t>(
-                                              data_dir)].Size =
-        data_directory_size;
+      data_32_.OptionalHeader
+        .DataDirectory[static_cast<std::uint32_t>(data_dir)]
+        .Size = data_directory_size;
     }
   }
 
@@ -1149,38 +1153,32 @@ private:
   IMAGE_NT_HEADERS64 data_64_ = IMAGE_NT_HEADERS64{};
 };
 
-inline bool operator==(NtHeaders const& lhs,
-                       NtHeaders const& rhs) noexcept
+inline bool operator==(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) noexcept
+inline bool operator!=(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(NtHeaders const& lhs,
-                      NtHeaders const& rhs) noexcept
+inline bool operator<(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) noexcept
+inline bool operator<=(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(NtHeaders const& lhs,
-                      NtHeaders const& rhs) noexcept
+inline bool operator>(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(NtHeaders const& lhs,
-                       NtHeaders const& rhs) noexcept
+inline bool operator>=(NtHeaders const& lhs, NtHeaders const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }
@@ -1205,9 +1203,9 @@ inline ULONGLONG GetRuntimeBase(Process const& process, PeFile const& pe_file)
 {
   switch (pe_file.GetType())
   {
-  case PeFileType::Image:
+  case PeFileType::kImage:
     return reinterpret_cast<ULONGLONG>(pe_file.GetBase());
-  case PeFileType::Data:
+  case PeFileType::kData:
     return NtHeaders(process, pe_file).GetImageBase();
   }
 

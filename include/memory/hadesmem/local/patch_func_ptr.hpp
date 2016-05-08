@@ -51,6 +51,12 @@ public:
       context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
   {
+    if (process.GetId() != ::GetCurrentProcessId())
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{
+          "PatchFuncPtr only supported on local process."});
+    }
   }
 
   explicit PatchFuncPtr(Process const&& process,

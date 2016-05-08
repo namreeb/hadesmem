@@ -220,8 +220,7 @@ void* FindRaw(Process const& process,
                 h_end,
                 n_beg,
                 n_end,
-                [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur)
-                {
+                [](std::uint8_t h_cur, detail::PatternDataByte const& n_cur) {
                   return n_cur.wildcard || h_cur == n_cur.data;
                 });
 
@@ -257,7 +256,7 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
 
   auto const base =
     reinterpret_cast<std::uint8_t*>(mod_info.module->GetHandle());
-  PeFile const pe_file{process, base, hadesmem::PeFileType::Image, 0};
+  PeFile const pe_file{process, base, hadesmem::PeFileType::kImage, 0};
   DosHeader const dos_header{process, pe_file};
   NtHeaders const nt_headers{process, pe_file};
   SectionList const sections{process, pe_file};
@@ -1131,8 +1130,7 @@ private:
       {
         std::uint32_t const flags = patterns_info_full.flags | p.pattern.flags;
         void* address = nullptr;
-        std::uintptr_t const start_rva = [&]() -> std::uintptr_t
-        {
+        std::uintptr_t const start_rva = [&]() -> std::uintptr_t {
           if (!p.pattern.start_rva.empty())
           {
             return detail::HexStrToPtr(p.pattern.start_rva);

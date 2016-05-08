@@ -32,7 +32,7 @@ void TestSectionList()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::kImage, 0);
 
   hadesmem::NtHeaders nt_headers_1(process, pe_file_1);
 
@@ -53,7 +53,7 @@ void TestSectionList()
   for (auto const& mod : modules)
   {
     hadesmem::PeFile const pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
+      process, mod.GetHandle(), hadesmem::PeFileType::kImage, 0);
 
     hadesmem::NtHeaders const nt_headers(process, pe_file);
     WORD const num_sections = nt_headers.GetNumberOfSections();
@@ -100,7 +100,7 @@ void TestSectionList()
       {
         hadesmem::PeFile const pe_file_ntdll(process,
                                              ::GetModuleHandleW(L"ntdll"),
-                                             hadesmem::PeFileType::Image,
+                                             hadesmem::PeFileType::kImage,
                                              0);
         hadesmem::Section const section_ntdll(process, pe_file_ntdll, nullptr);
         std::stringstream test_str_3;
@@ -114,8 +114,7 @@ void TestSectionList()
     // Assume every module has a '.data' section.
     auto text_iter = std::find_if(std::begin(sections),
                                   std::end(sections),
-                                  [](hadesmem::Section const& section)
-                                  {
+                                  [](hadesmem::Section const& section) {
                                     return section.GetName() == ".data";
                                   });
     BOOST_TEST(text_iter != std::end(sections));

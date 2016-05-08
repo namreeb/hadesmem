@@ -60,5 +60,13 @@ void DumpSections(hadesmem::Process const& process,
     WriteNamedHex(out, L"NumberOfRelocations", s.GetNumberOfRelocations(), 2);
     WriteNamedHex(out, L"NumberOfLinenumbers", s.GetNumberOfLinenumbers(), 2);
     WriteNamedHex(out, L"Characteristics", s.GetCharacteristics(), 2);
+
+    if (pe_file.GetType() == hadesmem::PeFileType::kData &&
+        s.GetPointerToRawData() + s.GetSizeOfRawData() > pe_file.GetSize())
+    {
+      WriteNewline(out);
+      WriteNormal(out, L"WARNING! Section size is invalid.", 1);
+      WarnForCurrentFile(WarningType::kSuspicious);
+    }
   }
 }

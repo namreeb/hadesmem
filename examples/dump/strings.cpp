@@ -32,7 +32,7 @@ void DumpStringsImpl(hadesmem::Process const& /*process*/,
 {
   std::wostream& out = GetOutputStreamW();
 
-  if (pe_file.GetType() != hadesmem::PeFileType::Data)
+  if (pe_file.GetType() != hadesmem::PeFileType::kData)
   {
     // TODO: Fix this.
     WriteNormal(out,

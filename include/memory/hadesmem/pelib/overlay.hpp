@@ -33,7 +33,7 @@ public:
   explicit Overlay(Process const& process, PeFile const& pe_file)
     : process_{&process}, pe_file_{&pe_file}, base_{}, size_{}
   {
-    if (pe_file.GetType() != PeFileType::Data)
+    if (pe_file.GetType() != PeFileType::kData)
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
                                       << ErrorString{"Invalid PE file type."});

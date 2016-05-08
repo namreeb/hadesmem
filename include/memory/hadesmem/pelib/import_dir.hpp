@@ -147,7 +147,7 @@ public:
     // It's possible for the last entry to be in virtual space, because it only
     // needs to have its Name or FirstThunk null.
     // Sample: imports_vterm.exe (Corkami PE Corpus)
-    return (pe_file_->GetType() == PeFileType::Data &&
+    return (pe_file_->GetType() == PeFileType::kData &&
             (base_ + sizeof(IMAGE_IMPORT_DESCRIPTOR)) >=
               static_cast<PBYTE>(pe_file_->GetBase()) + pe_file_->GetSize());
   }

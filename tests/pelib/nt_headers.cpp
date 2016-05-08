@@ -24,7 +24,7 @@ void TestNtHeaders()
   hadesmem::Process const process(::GetCurrentProcessId());
 
   hadesmem::PeFile pe_file_1(
-    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::Image, 0);
+    process, ::GetModuleHandleW(nullptr), hadesmem::PeFileType::kImage, 0);
 
   hadesmem::NtHeaders nt_headers_1(process, pe_file_1);
 
@@ -41,7 +41,7 @@ void TestNtHeaders()
   for (auto const& mod : modules)
   {
     hadesmem::PeFile const cur_pe_file(
-      process, mod.GetHandle(), hadesmem::PeFileType::Image, 0);
+      process, mod.GetHandle(), hadesmem::PeFileType::kImage, 0);
 
     hadesmem::NtHeaders cur_nt_headers(process, cur_pe_file);
 
@@ -132,7 +132,7 @@ void TestNtHeaders()
     if (mod.GetHandle() != ::GetModuleHandle(L"ntdll"))
     {
       hadesmem::PeFile const pe_file_ntdll(
-        process, ::GetModuleHandleW(L"ntdll"), hadesmem::PeFileType::Image, 0);
+        process, ::GetModuleHandleW(L"ntdll"), hadesmem::PeFileType::kImage, 0);
       hadesmem::NtHeaders const nt_headers_ntdll(process, pe_file_ntdll);
       std::stringstream test_str_3;
       test_str_3.imbue(std::locale::classic());
