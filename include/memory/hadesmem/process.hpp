@@ -29,7 +29,11 @@
 // TODO: Support cross architecture process manipulation (opening an x86 WoW64
 // process as native x64). Includes removing dependency of non-ntdll in injected
 // code and DLL loader, and adding cross architecture support for pelib, thread,
-// etc.
+// etc. We have removed the x64 -> x86 hard-restriction, but there are still
+// many components that need updating. Many components need special thought such
+// as dump, call, inject, patch, findpattern, etc. We could probably re-use the
+// cross-arch inject workaround from Cerberus until we finish adding full native
+// support.
 
 namespace hadesmem
 {
@@ -105,17 +109,15 @@ public:
 private:
   void CheckWoW64() const
   {
-    if (detail::IsWoW64Process(::GetCurrentProcess()) !=
-        detail::IsWoW64Process(handle_.GetHandle()))
+    if (detail::IsWoW64Process(::GetCurrentProcess()) &&
+        !detail::IsWoW64Process(handle_.GetHandle()))
     {
-      // TODO: Lift this restriction. x64 operating on x86 process should be
-      // relatively straightforward. We can use NtWow64ReadVirtualMemory64 (and
+      // TODO: Lift this restriction. We can use NtWow64ReadVirtualMemory64 (and
       // similar APIs for thread context, process information query, etc.) to
-      // make it work for x86 operating on x64 also, but we will need to
-      // implement more APIs manually (e.g. module enumeration?).
+      // make it work, but we will need to implement more APIs manually (e.g.
+      // module enumeration?).
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"Cross-architecture process manipulation is "
-                               "currently unsupported."});
+        Error{} << ErrorString{"x86 -> x64 process modification unsupported."});
     }
   }
 

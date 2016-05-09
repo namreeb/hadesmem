@@ -71,7 +71,7 @@ void TestTlsDir()
     cur_tls_dir->SetAddressOfCallBacks(cur_tls_dir->GetAddressOfCallBacks());
     cur_tls_dir->SetSizeOfZeroFill(cur_tls_dir->GetSizeOfZeroFill());
     cur_tls_dir->SetCharacteristics(cur_tls_dir->GetCharacteristics());
-    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
+    std::vector<ULONGLONG> callbacks;
     cur_tls_dir->GetCallbacks(std::back_inserter(callbacks));
     cur_tls_dir->UpdateWrite();
     cur_tls_dir->UpdateRead();

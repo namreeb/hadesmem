@@ -49,8 +49,8 @@ public:
     // processes.
     try
     {
-      impl_->snap_ = detail::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
-                                                      impl_->process_->GetId());
+      impl_->snap_ = detail::CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, impl_->process_->GetId());
     }
     catch (std::exception const&)
     {
@@ -136,13 +136,12 @@ public:
   using iterator = ModuleIterator<Module>;
   using const_iterator = ModuleIterator<Module const>;
 
-  constexpr explicit ModuleList(Process const& process)
-    noexcept : process_{&process}
+  constexpr explicit ModuleList(Process const& process) noexcept
+    : process_{&process}
   {
   }
 
-  constexpr explicit ModuleList(Process&& process)
-    noexcept = delete;
+  constexpr explicit ModuleList(Process&& process) noexcept = delete;
 
   iterator begin()
   {

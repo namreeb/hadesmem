@@ -138,27 +138,8 @@ public:
     HADESMEM_DETAIL_STATIC_ASSERT(
       std::is_base_of<std::output_iterator_tag, OutputIteratorCategory>::value);
 
-    auto const image_base = GetRuntimeBase(*process_, *pe_file_);
-    auto callbacks_raw = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(
-      RvaToVa(*process_,
-              *pe_file_,
-              static_cast<DWORD>(GetAddressOfCallBacks() - image_base)));
-    if (!callbacks_raw)
-    {
-      HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{"TLS callbacks are invalid."});
-    }
-
-    for (auto callback = Read<PIMAGE_TLS_CALLBACK>(*process_, callbacks_raw);
-         callback;
-         callback = Read<PIMAGE_TLS_CALLBACK>(*process_, ++callbacks_raw))
-    {
-      auto const callback_offset =
-        reinterpret_cast<ULONGLONG>(callback) - image_base;
-      *callbacks = reinterpret_cast<PIMAGE_TLS_CALLBACK>(
-        static_cast<ULONG_PTR>(callback_offset));
-      ++callbacks;
-    }
+    pe_file_->Is64() ? GetCallbacksImpl<ULONGLONG>(callbacks)
+                     : GetCallbacksImpl<DWORD>(callbacks);
   }
 
   // TODO: Add SetCallbacks.
@@ -262,6 +243,27 @@ public:
   }
 
 private:
+  template <typename T, typename OutputIterator>
+  void GetCallbacksImpl(OutputIterator callbacks) const
+  {
+    auto const image_base = GetRuntimeBase(*process_, *pe_file_);
+    auto callbacks_raw = reinterpret_cast<T*>(
+      RvaToVa(*process_,
+              *pe_file_,
+              static_cast<DWORD>(GetAddressOfCallBacks() - image_base)));
+    if (!callbacks_raw)
+    {
+      HADESMEM_DETAIL_THROW_EXCEPTION(
+        Error{} << ErrorString{"TLS callbacks are invalid."});
+    }
+
+    for (auto callback = Read<T>(*process_, callbacks_raw); callback;
+         callback = Read<T>(*process_, ++callbacks_raw))
+    {
+      *callbacks++ = static_cast<ULONGLONG>(callback) - image_base;
+    }
+  }
+
   Process const* process_;
   PeFile const* pe_file_;
   std::uint8_t* base_{};
@@ -269,38 +271,32 @@ private:
   IMAGE_TLS_DIRECTORY64 data_64_ = IMAGE_TLS_DIRECTORY64{};
 };
 
-inline bool operator==(TlsDir const& lhs,
-                       TlsDir const& rhs) noexcept
+inline bool operator==(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() == rhs.GetBase();
 }
 
-inline bool operator!=(TlsDir const& lhs,
-                       TlsDir const& rhs) noexcept
+inline bool operator!=(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-inline bool operator<(TlsDir const& lhs,
-                      TlsDir const& rhs) noexcept
+inline bool operator<(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() < rhs.GetBase();
 }
 
-inline bool operator<=(TlsDir const& lhs,
-                       TlsDir const& rhs) noexcept
+inline bool operator<=(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() <= rhs.GetBase();
 }
 
-inline bool operator>(TlsDir const& lhs,
-                      TlsDir const& rhs) noexcept
+inline bool operator>(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() > rhs.GetBase();
 }
 
-inline bool operator>=(TlsDir const& lhs,
-                       TlsDir const& rhs) noexcept
+inline bool operator>=(TlsDir const& lhs, TlsDir const& rhs) noexcept
 {
   return lhs.GetBase() >= rhs.GetBase();
 }

@@ -43,7 +43,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     out, L"AddressOfCallBacks", tls_dir->GetAddressOfCallBacks(), 2);
   if (tls_dir->GetAddressOfCallBacks())
   {
-    std::vector<PIMAGE_TLS_CALLBACK> callbacks;
+    std::vector<ULONGLONG> callbacks;
     try
     {
       tls_dir->GetCallbacks(std::back_inserter(callbacks));
@@ -55,7 +55,7 @@ void DumpTls(hadesmem::Process const& process, hadesmem::PeFile const& pe_file)
     }
     for (auto const& c : callbacks)
     {
-      WriteNamedHex(out, L"Callback", reinterpret_cast<DWORD_PTR>(c), 2);
+      WriteNamedHex(out, L"Callback", static_cast<DWORD_PTR>(c), 2);
     }
   }
   WriteNamedHex(out, L"SizeOfZeroFill", tls_dir->GetSizeOfZeroFill(), 2);
