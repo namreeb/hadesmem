@@ -1089,8 +1089,11 @@ private:
 
     auto const pe_size = m->pe_file_.GetSize();
 
-    HADESMEM_DETAIL_TRACE_FORMAT_A(
-      "Starting module dumping. Base: [%p]. Size: [%X].", base, pe_size);
+    HADESMEM_DETAIL_TRACE_FORMAT_W(
+      L"Starting module dumping. Name: [%s]. Base: [%p]. Size: [%X].",
+      m->name_.c_str(),
+      base,
+      pe_size);
 
     auto raw = ReadVectorEx<std::uint8_t>(
       *process_, base, pe_size, ReadFlags::kZeroFillReserved);
@@ -1171,7 +1174,7 @@ private:
         raw_new, export_map, base, pe_size, local_process, pe_file_new);
 
       auto coalesced_fixup_map = CoalesceImportDescriptors(fixup_map);
-      
+
       // TODO: Figure out why IDA doesn't like our import tables sometimes. It
       // shows the import fine in the disassembly view (including name, xrefs,
       // etc) but not in the imports tab. It seems to happen when we have
