@@ -101,6 +101,9 @@ public:
       context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
   {
+    HADESMEM_DETAIL_ASSERT(target_ != nullptr);
+    HADESMEM_DETAIL_ASSERT(detour_ != nullptr);
+
     if (process.GetId() != ::GetCurrentProcessId())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
@@ -210,21 +213,12 @@ public:
     auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
     auto const detour_raw = detour_.target<DetourFuncRawT>();
-    if (detour_raw || detour_)
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "Target = %p, Detour = %p, Trampoline = %p.",
-        target_,
-        detour_raw,
-        trampoline_->GetBase());
-    }
-    else
-    {
-      HADESMEM_DETAIL_TRACE_FORMAT_A(
-        "Target = %p, Detour = INVALID, Trampoline = %p.",
-        target_,
-        trampoline_->GetBase());
-    }
+    HADESMEM_DETAIL_TRACE_FORMAT_A(
+      "This = %p, Target = %p, Detour = %p, Trampoline = %p.",
+      this,
+      target_,
+      detour_raw,
+      trampoline_->GetBase());
 
     auto const buffer =
       ReadVector<std::uint8_t>(*process_, target_, kTrampSize);

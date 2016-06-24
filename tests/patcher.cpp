@@ -230,19 +230,19 @@ void GenerateBasicCall(asmjit::X86Compiler& c)
   auto a1 = c.newInt32("a1");
   c.setArg(0, a1);
   auto a2 = c.newInt32("a2");
-  c.setArg(0, a2);
+  c.setArg(1, a2);
   auto a3 = c.newInt32("a3");
-  c.setArg(0, a3);
+  c.setArg(2, a3);
   auto a4 = c.newInt32("a4");
-  c.setArg(0, a4);
+  c.setArg(3, a4);
   auto a5 = c.newInt32("a5");
-  c.setArg(0, a5);
+  c.setArg(4, a5);
   auto a6 = c.newInt32("a6");
-  c.setArg(0, a6);
+  c.setArg(5, a6);
   auto a7 = c.newInt32("a7");
-  c.setArg(0, a7);
+  c.setArg(6, a7);
   auto a8 = c.newInt32("a8");
-  c.setArg(0, a8);
+  c.setArg(7, a8);
 
   auto address = c.newUIntPtr("address");
   c.mov(address, asmjit::imm_u(reinterpret_cast<std::uintptr_t>(&HookMe)));

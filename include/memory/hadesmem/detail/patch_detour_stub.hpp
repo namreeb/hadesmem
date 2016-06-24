@@ -100,7 +100,8 @@ private:
 
 #define HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(call_conv)                      \
   \
-template<typename R, typename... Args> \
+template<typename R, typename... Args>                                         \
+    \
 class PatchDetourStub<R(call_conv*)(Args...)>                                  \
   \
 {                                                                         \
@@ -136,13 +137,18 @@ private:                                                                       \
   \
 };                                                                             \
   \
-template<typename R, typename... Args> \
+\
+template<typename R, typename... Args>                                         \
+    \
+\
 class PatchDetourStub<R call_conv(Args...)>                                    \
   \
-{                                                                         \
+\
+{                                                                      \
   \
+\
 public:                                                                        \
-    using DetourFuncRawT = R call_conv(PatchDetourBase*, Args...);             \
+    using DetourFuncRawT = R(call_conv*)(PatchDetourBase*, Args...);           \
     using DetourFuncT = std::function<R(PatchDetourBase*, Args...)>;           \
                                                                                \
     explicit PatchDetourStub(PatchDetourBase* patch) : patch_{patch}           \
@@ -167,8 +173,8 @@ private:                                                                       \
         static_cast<DetourFuncT const*>(patch_->GetDetour());                  \
       return (*detour)(patch_, std::forward<Args>(args)...);                   \
     }                                                                          \
-    \
-PatchDetourBase* patch_;                                                       \
+                                                                               \
+    PatchDetourBase* patch_;                                                   \
   \
 };
 
