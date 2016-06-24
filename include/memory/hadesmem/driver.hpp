@@ -64,20 +64,33 @@ inline void LoadDriver(std::wstring const& name, std::wstring const& path)
   hadesmem::detail::SmartRegKeyHandle const smart_services_key{services_key};
 
   HKEY service_key = nullptr;
-  auto const create_status =
-    ::RegCreateKeyW(services_key, name.c_str(), &service_key);
+  DWORD disposition = 0;
+  auto const create_status = ::RegCreateKeyExW(services_key,
+                                               name.c_str(),
+                                               0,
+                                               nullptr,
+                                               0,
+                                               KEY_ALL_ACCESS,
+                                               nullptr,
+                                               &service_key,
+                                               &disposition);
   if (create_status != ERROR_SUCCESS)
   {
     DWORD const last_error = ::GetLastError();
     HADESMEM_DETAIL_THROW_EXCEPTION(Error{}
-                                    << ErrorString{"RegOpenKeyW failed."}
+                                    << ErrorString{"RegCreateKeyW failed."}
                                     << ErrorCodeWinLast{last_error}
                                     << ErrorCodeWinHr{create_status});
   }
   hadesmem::detail::SmartRegKeyHandle const smart_service_key{service_key};
 
-  auto const delete_tree = [&]()
+  if (disposition == REG_OPENED_EXISTING_KEY)
   {
+    HADESMEM_DETAIL_THROW_EXCEPTION(
+      Error{} << ErrorString{"Target registry key already exists."});
+  }
+
+  auto const delete_tree = [&]() {
     ::RegDeleteTreeW(HKEY_LOCAL_MACHINE,
                      (L"SYSTEM\\CurrentControlSet\\Services\\" + name).c_str());
   };
