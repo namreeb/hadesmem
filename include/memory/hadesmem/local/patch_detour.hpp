@@ -213,6 +213,7 @@ public:
     auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
     auto const detour_raw = detour_.target<DetourFuncRawT>();
+    (void)detour_raw;
     HADESMEM_DETAIL_TRACE_FORMAT_A(
       "This = %p, Target = %p, Detour = %p, Trampoline = %p.",
       this,
