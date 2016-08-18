@@ -23,7 +23,7 @@ inline std::wstring UnicodeStringToStdString(PCUNICODE_STRING in)
 {
   if (!in->Length || !in->Buffer)
   {
-	return{};
+    return {};
   }
 
   return std::wstring(in->Buffer, in->Length / sizeof(wchar_t));
@@ -344,14 +344,13 @@ struct SYSTEM_PROCESS_INFORMATION_EXTENSION
 {
   PROCESS_DISK_COUNTERS DiskCounters;
   ULONG64 ContextSwitches;
-  union
-  {
-	ULONG Flags;
-	struct
-	{
-	  ULONG HasStrongId : 1;
-	  ULONG Spare : 31;
-	} s;
+  union {
+    ULONG Flags;
+    struct
+    {
+      ULONG HasStrongId : 1;
+      ULONG Spare : 31;
+    } s;
   } u;
   ULONG UserSidOffset;
 };
@@ -568,15 +567,14 @@ struct FILE_OBJECTID_INFORMATION
 {
   LONGLONG FileReference;
   UCHAR ObjectId[16];
-  union
-  {
-	struct
-	{
-	  UCHAR BirthVolumeId[16];
-	  UCHAR BirthObjectId[16];
-	  UCHAR DomainId[16];
-	} s;
-	UCHAR ExtendedInfo[48];
+  union {
+    struct
+    {
+      UCHAR BirthVolumeId[16];
+      UCHAR BirthObjectId[16];
+      UCHAR DomainId[16];
+    } s;
+    UCHAR ExtendedInfo[48];
   } u;
 };
 
@@ -599,7 +597,7 @@ typedef struct _PROCESS_BASIC_INFORMATION
 } PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
 
 typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME*
-PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+  PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
 
 struct RTL_ACTIVATION_CONTEXT_STACK_FRAME
 {
@@ -696,7 +694,7 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS
   UNICODE_STRING ShellInfo;
   UNICODE_STRING RuntimeData;
   RTL_DRIVE_LETTER_CURDIR
-	CurrentDirectories[HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS];
+  CurrentDirectories[HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS];
 
   ULONG EnvironmentSize;
   ULONG EnvironmentVersion;
@@ -725,10 +723,9 @@ struct PEB
   ULONG ProcessInJob : 1;
   ULONG ProcessInitializing : 1;
   ULONG ReservedBits0 : 30;
-  union
-  {
-	PVOID KernelCallbackTable;
-	PVOID UserSharedInfoPtr;
+  union {
+    PVOID KernelCallbackTable;
+    PVOID UserSharedInfoPtr;
   };
   ULONG SystemReserved[1];
   ULONG SpareUlong;
@@ -966,8 +963,7 @@ typedef struct _SYSTEM_HANDLE_INFORMATION
   SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
 } SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
 
-typedef enum _OBJECT_INFORMATION_CLASS
-{
+typedef enum _OBJECT_INFORMATION_CLASS {
   ObjectBasicInformation,
   ObjectNameInformation,
   ObjectTypeInformation,
