@@ -23,7 +23,7 @@ inline std::wstring UnicodeStringToStdString(PCUNICODE_STRING in)
 {
   if (!in->Length || !in->Buffer)
   {
-    return {};
+	return{};
   }
 
   return std::wstring(in->Buffer, in->Length / sizeof(wchar_t));
@@ -346,12 +346,12 @@ struct SYSTEM_PROCESS_INFORMATION_EXTENSION
   ULONG64 ContextSwitches;
   union
   {
-    ULONG Flags;
-    struct
-    {
-      ULONG HasStrongId : 1;
-      ULONG Spare : 31;
-    } s;
+	ULONG Flags;
+	struct
+	{
+	  ULONG HasStrongId : 1;
+	  ULONG Spare : 31;
+	} s;
   } u;
   ULONG UserSidOffset;
 };
@@ -570,13 +570,13 @@ struct FILE_OBJECTID_INFORMATION
   UCHAR ObjectId[16];
   union
   {
-    struct
-    {
-      UCHAR BirthVolumeId[16];
-      UCHAR BirthObjectId[16];
-      UCHAR DomainId[16];
-    } s;
-    UCHAR ExtendedInfo[48];
+	struct
+	{
+	  UCHAR BirthVolumeId[16];
+	  UCHAR BirthObjectId[16];
+	  UCHAR DomainId[16];
+	} s;
+	UCHAR ExtendedInfo[48];
   } u;
 };
 
@@ -599,7 +599,7 @@ typedef struct _PROCESS_BASIC_INFORMATION
 } PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
 
 typedef struct RTL_ACTIVATION_CONTEXT_STACK_FRAME*
-  PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
 
 struct RTL_ACTIVATION_CONTEXT_STACK_FRAME
 {
@@ -696,7 +696,7 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS
   UNICODE_STRING ShellInfo;
   UNICODE_STRING RuntimeData;
   RTL_DRIVE_LETTER_CURDIR
-  CurrentDirectories[HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS];
+	CurrentDirectories[HADESMEM_DETAIL_RTL_MAX_DRIVE_LETTERS];
 
   ULONG EnvironmentSize;
   ULONG EnvironmentVersion;
@@ -727,8 +727,8 @@ struct PEB
   ULONG ReservedBits0 : 30;
   union
   {
-    PVOID KernelCallbackTable;
-    PVOID UserSharedInfoPtr;
+	PVOID KernelCallbackTable;
+	PVOID UserSharedInfoPtr;
   };
   ULONG SystemReserved[1];
   ULONG SpareUlong;
@@ -981,6 +981,14 @@ typedef struct _OBJECT_NAME_INFORMATION
 {
   UNICODE_STRING Name;
 } OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
+
+typedef struct _RTL_VEH_NODE
+{
+  _RTL_VEH_NODE* Prev;
+  _RTL_VEH_NODE* Next;
+  UINT Refs;
+  PVOID Handler;
+} VEH_NODE, *PVEH_NODE;
 }
 }
 }
