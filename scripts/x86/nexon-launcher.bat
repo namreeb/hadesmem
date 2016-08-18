@@ -1,0 +1,1 @@
+inject.exe --run "C:\Program Files (x86)\Nexon\Nexon Launcher\nexon_launcher.exe" --inject --export Load --add-path --path-resolution --module cerberus.dll
