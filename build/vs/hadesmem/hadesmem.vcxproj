@@ -62,6 +62,7 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\to_upper_ordinal.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\trace.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\type_traits.hpp" />
+    <ClInclude Include="..\..\..\include\memory\hadesmem\detail\veh_chain.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_prefix.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\warning_disable_suffix.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\winapi.hpp" />
