@@ -340,7 +340,7 @@ inline std::wstring PathRemoveFileSpecWrapper(std::wstring path)
       if (FAILED(hr))
       {
         HADESMEM_DETAIL_THROW_EXCEPTION(
-          Error{} << ErrorString{"PathCchCanonicalizeEx failed."}
+          Error{} << ErrorString{"PathCchRemoveFileSpec failed."}
                   << ErrorCodeWinHr{hr});
       }
     }

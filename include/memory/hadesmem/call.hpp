@@ -16,6 +16,11 @@
 #include <windows.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+// Please don't send an angry mob after me. I really am sorry...
+// Try not to hurt yourself with ODR violations I guess.
+#if (_MANAGED == 1) || (_M_CEE == 1)
+#define ASMJIT_RELEASE
+#endif
 #include <asmjit/asmjit.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 

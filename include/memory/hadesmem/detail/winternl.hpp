@@ -886,6 +886,8 @@ struct TEB
   LARGE_INTEGER WaitReasonBitMap;
 };
 
+#pragma managed(push, off)
+
 #if defined(HADESMEM_DETAIL_ARCH_X64)
 inline TEB* GetCurrentTeb()
 {
@@ -899,6 +901,8 @@ inline TEB* GetCurrentTeb()
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif
+
+#pragma managed(pop)
 
 typedef struct _SYSTEM_TIMEOFDAY_INFORMATION
 {

@@ -68,6 +68,7 @@ inline std::list<winternl::VEH_NODE>
   HADESMEM_DETAIL_TRACE_FORMAT_A(
     "Code pointer = %p, Head = %p", curr_code, head_node);
 
+  // TODO: Make this safe somehow.
   do
   {
     chain.push_back(*node_iter);

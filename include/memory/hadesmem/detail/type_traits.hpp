@@ -86,7 +86,7 @@ HADESMEM_DETAIL_MAKE_FUNC_RESULT(__fastcall)
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL) && ((_MANAGED != 1) && (_M_CEE != 1))
 
 HADESMEM_DETAIL_MAKE_FUNC_RESULT(__vectorcall)
 
@@ -147,7 +147,7 @@ HADESMEM_DETAIL_MAKE_FUNC_ARITY(__fastcall)
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL) && ((_MANAGED != 1) && (_M_CEE != 1))
 
 HADESMEM_DETAIL_MAKE_FUNC_ARITY(__vectorcall)
 
@@ -205,7 +205,7 @@ HADESMEM_DETAIL_MAKE_FUNC_ARGS(__fastcall)
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL) && ((_MANAGED != 1) && (_M_CEE != 1))
 
 HADESMEM_DETAIL_MAKE_FUNC_ARGS(__vectorcall)
 

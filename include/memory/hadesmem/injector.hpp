@@ -176,7 +176,7 @@ inline HMODULE InjectDll(Process const& process,
          reinterpret_cast<decltype(&LoadLibraryExW)>(load_library),
          CallConv::kStdCall,
          static_cast<LPCWSTR>(lib_file_remote.GetBase()),
-         nullptr,
+         __nullptr, // Can't use nullptr here because /clr...
          add_path ? LOAD_WITH_ALTERED_SEARCH_PATH : 0UL);
   if (!load_library_ret.GetReturnValue())
   {
