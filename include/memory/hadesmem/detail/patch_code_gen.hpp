@@ -66,8 +66,7 @@ inline std::unique_ptr<Allocator> AllocatePageNear(Process const& process,
 
   auto const allocate_tramp = [](Process const& process,
                                  PVOID addr,
-                                 SIZE_T size) -> std::unique_ptr<Allocator>
-  {
+                                 SIZE_T size) -> std::unique_ptr<Allocator> {
     auto const new_addr = detail::TryAlloc(process, size, addr);
     return new_addr ? std::make_unique<Allocator>(process, size, new_addr, true)
                     : std::unique_ptr<Allocator>();
@@ -199,13 +198,13 @@ inline std::vector<std::uint8_t> GenCallTramp64(void* address, void* target)
 inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 {
   // clang-format off
-  std::vector<std::uint8_t> buf = 
-  {
-    // PUSH 0xDEADBEEF
-    0x68, 0xEF, 0xBE, 0xAD, 0xDE,
-    // RET
-    0xC3
-  };
+      std::vector<std::uint8_t> buf =
+      {
+        // PUSH 0xDEADBEEF
+        0x68, 0xEF, 0xBE, 0xAD, 0xDE,
+        // RET
+        0xC3
+      };
   // clang-format on
   auto const op_len = 1;
   auto const target_low = static_cast<std::uint32_t>(
@@ -217,15 +216,15 @@ inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 inline std::vector<std::uint8_t> GenPush64Ret(void* target)
 {
   // clang-format off
-  std::vector<std::uint8_t> buf =
-  {
-    // PUSH 0xDEADBEEF
-    0x68, 0xEF, 0xBE, 0xAD, 0xDE, 
-    // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
-    0xC7, 0x44, 0x24, 0x04, 0xEF, 0xBE, 0xAD, 0xDE,
-    // RET
-    0xC3
-  };
+      std::vector<std::uint8_t> buf =
+      {
+        // PUSH 0xDEADBEEF
+        0x68, 0xEF, 0xBE, 0xAD, 0xDE,
+        // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
+        0xC7, 0x44, 0x24, 0x04, 0xEF, 0xBE, 0xAD, 0xDE,
+        // RET
+        0xC3
+      };
   // clang-format on
   auto const low_data_offs = 1;
   auto const high_data_offs = 9;
@@ -378,19 +377,32 @@ inline std::size_t
 // TODO: Ensure we're correcty saving all registers/state. Currently
 // we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate32(void* stub,
-                                               void* get_orig_user_ptr_ptr_fn)
+                                               void* get_orig_user_ptr_ptr_fn,
+                                               void* get_ret_address_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
   // Add NOPs so Steam overlay works. It follows our hook, and it does not
   // recognize the opcode sequence otherwise.
   // clang-format off
-  std::vector<std::uint8_t> buf = 
+  std::vector<std::uint8_t> buf =
   {
     // NOP (x 5)
-    0x90, 0x90, 0x90, 0x90, 0x90, 
+    0x90, 0x90, 0x90, 0x90, 0x90,
     // PUSHAD
     0x60,
+    // MOV ECX, DWORD PTR SS:[ESP+0x20]
+    0x8B, 0x4C, 0x24, 0x20,
+    // MOV EAX, 0xDEADBABE
+    0xB8, 0xBE, 0xBA, 0xAD, 0xDE,
+    // PUSH ECX
+    0x51,
+    // CALL EAX
+    0xFF, 0xD0,
+    // POP ECX,
+    0x59,
+    // MOV [EAX], ECX
+    0x89, 0x08,
     // MOV ECX, FS:[0x14]
     0x64, 0x8B, 0x0D, 0x14, 0x00, 0x00, 0x00,
     // MOV EAX, 0xDEADBEEF
@@ -411,8 +423,10 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
     0x61
   };
   // clang-format on
-  std::size_t const kStubPtrOfs = 9 + 5;
-  std::size_t const kUserPtrOfs = 20 + 5;
+  std::size_t const kRetAddrPtrOfs = 11;
+  std::size_t const kStubPtrOfs = 29;
+  std::size_t const kUserPtrOfs = 40;
+  *reinterpret_cast<void**>(&buf[kRetAddrPtrOfs]) = get_ret_address_ptr_ptr_fn;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
   *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = get_orig_user_ptr_ptr_fn;
   return buf;
@@ -421,12 +435,13 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
 // TODO: Ensure we're correcty saving all registers/state. Currently
 // we're only saving regular registers. What about eflags, fpu, sse, etc.
 inline std::vector<std::uint8_t> GenStubGate64(void* stub,
-                                               void* get_orig_user_ptr_ptr_fn)
+                                               void* get_orig_user_ptr_ptr_fn,
+                                               void* get_ret_address_ptr_ptr_fn)
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
   // clang-format off
-  std::vector<std::uint8_t> buf = 
+  std::vector<std::uint8_t> buf =
   {
     // PUSH RAX
     0x50,
@@ -458,6 +473,18 @@ inline std::vector<std::uint8_t> GenStubGate64(void* stub,
     0x41, 0x56,
     // PUSH R15
     0x41, 0x57,
+    // MOV RCX, QWORD PTR SS:[RSP+0x78]
+    0x48, 0x8B, 0x4C, 0x24, 0x78,
+    // MOV RAX, 0xDEADBABEDEADBABE
+    0x48, 0xB8, 0xBE, 0xBA, 0xAD, 0xDE, 0xBE, 0xBA, 0xAD, 0xDE,
+    // PUSH RCX
+    0x51,
+    // CALL RAX
+    0xFF, 0xD0,
+    // POP RCX
+    0x59,
+    // MOV [RAX], ECX
+    0x48, 0x89, 0x08,
     // MOV RCX, GS:[0x28]
     0x65, 0x48, 0x8B, 0x0C, 0x25, 0x28, 0x00, 0x00, 0x00,
     // MOV RAX, 0xDEADBEEFDEADBEEF
@@ -506,8 +533,10 @@ inline std::vector<std::uint8_t> GenStubGate64(void* stub,
     0x58
   };
   // clang-format on
-  std::size_t const kStubPtrOfs = 34;
-  std::size_t const kUserPtrOfs = 53;
+  std::size_t const kRetAddrPtrOfs = 30;
+  std::size_t const kStubPtrOfs = 56;
+  std::size_t const kUserPtrOfs = 75;
+  *reinterpret_cast<void**>(&buf[kRetAddrPtrOfs]) = get_ret_address_ptr_ptr_fn;
   *reinterpret_cast<void**>(&buf[kStubPtrOfs]) = stub;
   *reinterpret_cast<void**>(&buf[kUserPtrOfs]) = get_orig_user_ptr_ptr_fn;
   return buf;
@@ -517,13 +546,16 @@ template <typename TargetFuncT>
 inline void WriteStubGate(Process const& process,
                           void* address,
                           void* stub,
-                          void* get_orig_user_ptr_ptr_fn)
+                          void* get_orig_user_ptr_ptr_fn,
+                          void* get_ret_address_ptr_ptr_fn)
 {
   using StubT = typename PatchDetourStub<TargetFuncT>;
 #if defined(HADESMEM_DETAIL_ARCH_X64)
-  auto const stub_gate = GenStubGate64(stub, get_orig_user_ptr_ptr_fn);
+  auto const stub_gate =
+    GenStubGate64(stub, get_orig_user_ptr_ptr_fn, get_ret_address_ptr_ptr_fn);
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
-  auto const stub_gate = GenStubGate32(stub, get_orig_user_ptr_ptr_fn);
+  auto const stub_gate =
+    GenStubGate32(stub, get_orig_user_ptr_ptr_fn, get_ret_address_ptr_ptr_fn);
 #else
 #error "[HadesMem] Unsupported architecture."
 #endif

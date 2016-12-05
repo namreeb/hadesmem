@@ -53,6 +53,11 @@ public:
     return *GetOriginalArbitraryUserPtrPtr();
   }
 
+  virtual void* GetReturnAddressPtr() const noexcept
+  {
+    return *GetReturnAddressPtrPtr();
+  }
+
   template <typename FuncT> FuncT GetTrampolineT() const noexcept
   {
     HADESMEM_DETAIL_STATIC_ASSERT(detail::IsFunction<FuncT>::value ||
@@ -70,6 +75,12 @@ protected:
   {
     thread_local static void* orig_user_ptr = 0;
     return &orig_user_ptr;
+  }
+
+  static void** GetReturnAddressPtrPtr() noexcept
+  {
+    thread_local static void* ret_address_ptr = 0;
+    return &ret_address_ptr;
   }
 };
 }

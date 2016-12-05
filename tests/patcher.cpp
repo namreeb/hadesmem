@@ -20,6 +20,7 @@
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/alias_cast.hpp>
+#include <hadesmem/detail/self_path.hpp>
 #include <hadesmem/error.hpp>
 #include <hadesmem/process.hpp>
 
@@ -78,6 +79,23 @@ std::unique_ptr<hadesmem::PatchDetour<decltype(&HookMe)>>& GetDetour2()
   return detour;
 }
 
+// TODO: Write a proper test for this that dynamically generates a stub which we
+// can use to verify the correctness of the return address to the byte rather
+// than just to module granularity...
+void CheckReturnAddress(hadesmem::PatchDetourBase* patch)
+{
+  const auto ret_addr = patch->GetReturnAddressPtr();
+  BOOST_TEST(ret_addr != nullptr);
+  MEMORY_BASIC_INFORMATION ra_mbi;
+  BOOST_TEST_EQ(VirtualQuery(ret_addr, &ra_mbi, sizeof(ra_mbi)),
+                sizeof(ra_mbi));
+  MEMORY_BASIC_INFORMATION me_mbi;
+  BOOST_TEST_EQ(
+    VirtualQuery(hadesmem::detail::GetHandleToSelf(), &me_mbi, sizeof(me_mbi)),
+    sizeof(me_mbi));
+  BOOST_TEST(ra_mbi.AllocationBase == me_mbi.AllocationBase);
+}
+
 extern "C" std::uint32_t __cdecl HookMeHk(hadesmem::PatchDetourBase* patch,
                                           std::int32_t i1,
                                           std::int32_t i2,
@@ -91,6 +109,7 @@ extern "C" std::uint32_t __cdecl HookMeHk(hadesmem::PatchDetourBase* patch,
   BOOST_TEST(patch->GetTrampoline() != nullptr);
   auto const orig = patch->GetTrampolineT<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1234UL);
+  CheckReturnAddress(patch);
   return 0x1337;
 }
 
@@ -107,6 +126,7 @@ extern "C" std::uint32_t __cdecl HookMeHk2(hadesmem::PatchDetourBase* patch,
   BOOST_TEST(patch->GetTrampoline() != nullptr);
   auto const orig = patch->GetTrampolineT<decltype(&HookMe)>();
   BOOST_TEST_EQ(orig(i1, i2, i3, i4, i5, i6, i7, i8), 0x1337UL);
+  CheckReturnAddress(patch);
   return 0x5678;
 }
 

@@ -152,7 +152,8 @@ public:
     detail::WriteStubGate<TargetFuncT>(*process_,
                                        stub_gate_->GetBase(),
                                        &*stub_,
-                                       &GetOriginalArbitraryUserPtrPtr);
+                                       &GetOriginalArbitraryUserPtrPtr,
+                                       &GetReturnAddressPtrPtr);
 
     orig_ = Read<void*>(*process_, target_);
 
