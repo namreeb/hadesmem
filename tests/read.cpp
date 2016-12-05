@@ -134,6 +134,11 @@ void TestReadVector()
 
   auto const empty_list =
     hadesmem::ReadVector<unsigned char>(process, &int_list[0], 0);
+
+  std::vector<int> int_list_read_bi;
+  hadesmem::Read<int>(process, int_list.data(), int_list.size(), 
+    std::back_inserter(int_list_read_bi));
+  BOOST_TEST(int_list == int_list_read_bi);
 }
 
 void TestReadCrossRegion()
