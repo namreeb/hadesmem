@@ -1127,9 +1127,11 @@ private:
 
     auto const section_datas =
       CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
-
-    HADESMEM_DETAIL_ASSERT(raw_new.size() <
-                           (std::numeric_limits<DWORD>::max)());
+    raw_new.reserve(raw_new.size() * 2);
+    
+    const auto dword_max = (std::numeric_limits<DWORD>::max)();
+    HADESMEM_DETAIL_ASSERT(raw_new.size() < dword_max);
+    HADESMEM_DETAIL_ASSERT(raw_new.capacity() < dword_max);
     PeFile const pe_file_new(local_process,
                              raw_new.data(),
                              PeFileType::kData,
