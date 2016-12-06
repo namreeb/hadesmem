@@ -16,6 +16,11 @@
 #include <windows.h>
 
 #include <hadesmem/detail/warning_disable_prefix.hpp>
+// Please don't send an angry mob after me. I really am sorry...
+// Try not to hurt yourself with ODR violations I guess.
+#if (_MANAGED == 1) || (_M_CEE == 1)
+#define ASMJIT_RELEASE
+#endif
 #include <asmjit/asmjit.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
@@ -983,6 +988,8 @@ inline void BuildCallArgs(OutputIterator /*call_args*/) noexcept
   return;
 }
 
+
+// TODO: Use a non-recursive implementation.
 template <typename FuncT,
           std::int32_t N,
           typename T,

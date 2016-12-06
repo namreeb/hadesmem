@@ -247,7 +247,8 @@ inline ModuleRegionInfo GetModuleInfo(Process const& process,
 
   if (module.empty())
   {
-    mod_info.module = std::make_shared<Module>(process, nullptr);
+    // I'm sorry... /clr
+    mod_info.module = std::make_shared<Module>(process, __nullptr);
   }
   else
   {

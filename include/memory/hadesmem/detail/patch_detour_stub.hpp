@@ -192,7 +192,7 @@ HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(__fastcall)
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-#if !defined(HADESMEM_DETAIL_NO_VECTORCALL)
+#if !defined(HADESMEM_DETAIL_NO_VECTORCALL) && ((_MANAGED != 1) && (_M_CEE != 1))
 
 HADESMEM_DETAIL_MAKE_PATCH_DETOUR_STUB(__vectorcall)
 

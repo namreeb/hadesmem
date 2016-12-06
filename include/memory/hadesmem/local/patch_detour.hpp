@@ -204,7 +204,9 @@ public:
     // heap lock).
     // TODO: Make suspension optional, as in some cases we know that all the
     // threads are suspended already (e.g. creation-time injection).
-    SuspendedProcess const suspended_process{process_->GetId()};
+    // Need to fix the potential deadlock problem, as well as the perf
+    // problem, before re-enabling this.
+    // SuspendedProcess const suspended_process{process_->GetId()};
 
     std::uint32_t const kMaxInstructionLen = 15;
     std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
@@ -350,7 +352,8 @@ public:
     detail::WriteStubGate<TargetFuncT>(*process_,
                                        stub_gate_->GetBase(),
                                        &*stub_,
-                                       &GetOriginalArbitraryUserPtrPtr);
+                                       &GetOriginalArbitraryUserPtrPtr,
+                                       &GetReturnAddressPtrPtr);
 
     orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
 
