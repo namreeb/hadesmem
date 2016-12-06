@@ -22,7 +22,7 @@
     <ProjectGuid>{8C71A376-12A9-4678-ADBF-721A011E928A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>esomod</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -22,7 +22,7 @@
     <ProjectGuid>{CD297298-66C8-4A8E-A5F4-671A08C2BE37}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cerberus_helper</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

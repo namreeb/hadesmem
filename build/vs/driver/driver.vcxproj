@@ -22,7 +22,7 @@
     <ProjectGuid>{CA1F395E-3259-43F2-B4CA-AF8955A3598C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>driver</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

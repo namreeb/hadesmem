@@ -62,7 +62,7 @@
     <ProjectGuid>{275F9872-5523-4B96-801E-F2C40E5D2071}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>anttweakbar</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

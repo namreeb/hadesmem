@@ -61,7 +61,7 @@
     <ProjectGuid>{21F0AFF0-E148-47CB-8EA2-6C503A0F2EB1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>chaiscript</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

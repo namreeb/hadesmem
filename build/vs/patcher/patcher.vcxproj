@@ -22,7 +22,7 @@
     <ProjectGuid>{73426EFE-1152-4AF0-8419-FE4DCB9270A2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>patcher</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
