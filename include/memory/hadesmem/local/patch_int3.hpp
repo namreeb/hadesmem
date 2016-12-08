@@ -102,7 +102,7 @@ protected:
     HADESMEM_DETAIL_TRACE_A("Writing breakpoint.");
 
     std::vector<std::uint8_t> const buf = {0xCC};
-    WriteVector(*process_, target_, buf);
+    WriteVector(process_, target_, buf);
 
     scope_cleanup_hook.Dismiss();
   }
@@ -111,7 +111,7 @@ protected:
   {
     HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
 
-    WriteVector(*process_, target_, orig_);
+    WriteVector(process_, target_, orig_);
 
     {
       hadesmem::detail::AcquireSRWLock const lock(

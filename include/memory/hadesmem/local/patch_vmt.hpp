@@ -33,7 +33,7 @@ public:
   PatchVmt(hadesmem::Process const& process,
            void* target_class,
            std::size_t vmt_size)
-    : process_{&process},
+    : process_{process},
       class_base_{static_cast<void***>(target_class)},
       old_vmt_{Read<void**>(process, class_base_)},
       vmt_size_{vmt_size},
@@ -42,14 +42,14 @@ public:
     if (process.GetId() != ::GetCurrentProcessId())
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(
-        Error{} << ErrorString{ "PatchVmt only supported on local process." });
+        Error{} << ErrorString{"PatchVmt only supported on local process."});
     }
 
     Initialize();
   }
 
   PatchVmt(hadesmem::Process const& process, void* target_class, TagUnsafe)
-    : process_{&process},
+    : process_{process},
       class_base_{static_cast<void***>(target_class)},
       old_vmt_{Read<void**>(process, class_base_)},
       vmt_size_{GetVmtSizeUnsafe(old_vmt_)},
@@ -62,14 +62,16 @@ public:
                     void* target_class,
                     std::size_t vmt_size) = delete;
 
-  explicit PatchVmt(Process const&& process, void* target_class, TagUnsafe) = delete;
+  explicit PatchVmt(Process const&& process,
+                    void* target_class,
+                    TagUnsafe) = delete;
 
   PatchVmt(PatchVmt const& other) = delete;
 
   PatchVmt& operator=(PatchVmt const& other) = delete;
 
   PatchVmt(PatchVmt&& other)
-    : process_{other.process_},
+    : process_{std::move(other.process_)},
       class_base_{other.class_base_},
       old_vmt_{other.old_vmt_},
       vmt_size_(other.vmt_size_),
@@ -77,7 +79,6 @@ public:
       new_vmt_base_{other.new_vmt_base_},
       hooks_(std::move(other.hooks_))
   {
-    other.process_ = nullptr;
     other.class_base_ = false;
     other.old_vmt_ = nullptr;
     other.vmt_size_ = 0;
@@ -88,8 +89,7 @@ public:
   {
     RemoveUnchecked();
 
-    process_ = other.process_;
-    other.process_ = nullptr;
+    process_ = std::move(other.process_);
 
     class_base_ = other.class_base_;
     other.class_base_ = nullptr;
@@ -119,14 +119,14 @@ public:
   {
     HADESMEM_DETAIL_ASSERT(class_base_);
     HADESMEM_DETAIL_ASSERT(new_vmt_base_);
-    Write(*process_, class_base_, new_vmt_base_);
+    Write(process_, class_base_, new_vmt_base_);
   }
 
   void Remove()
   {
     HADESMEM_DETAIL_ASSERT(class_base_);
     HADESMEM_DETAIL_ASSERT(new_vmt_base_);
-    Write(*process_, class_base_, old_vmt_);
+    Write(process_, class_base_, old_vmt_);
   }
 
   std::size_t GetSize() const noexcept
@@ -155,8 +155,8 @@ private:
     try
     {
       auto const rtti_ptr =
-        Read<void*>(*process_, reinterpret_cast<std::uint8_t*>(old_vmt_) - 4);
-      Write(*process_, new_vmt_.GetBase(), rtti_ptr);
+        Read<void*>(process_, reinterpret_cast<std::uint8_t*>(old_vmt_) - 4);
+      Write(process_, new_vmt_.GetBase(), rtti_ptr);
       new_vmt_base_ = static_cast<std::uint8_t*>(new_vmt_.GetBase()) + 4;
     }
     catch (...)
@@ -164,8 +164,8 @@ private:
       new_vmt_base_ = new_vmt_.GetBase();
     }
     auto const old_vmt_contents =
-      ReadVector<void*>(*process_, old_vmt_, vmt_size_);
-    WriteVector(*process_, new_vmt_base_, old_vmt_contents);
+      ReadVector<void*>(process_, old_vmt_, vmt_size_);
+    WriteVector(process_, new_vmt_base_, old_vmt_contents);
   }
 
   void RemoveUnchecked() noexcept
@@ -188,15 +188,15 @@ private:
     std::size_t i = 0;
     try
     {
-      void* f = Read<void*>(*process_, vmt + i);
+      void* f = Read<void*>(process_, vmt + i);
       for (; f; ++i)
       {
-        if (!hadesmem::CanExecute(*process_, f))
+        if (!hadesmem::CanExecute(process_, f))
         {
           break;
         }
 
-        f = Read<void*>(*process_, vmt + i);
+        f = Read<void*>(process_, vmt + i);
       }
     }
     catch (...)
@@ -206,7 +206,7 @@ private:
     return i;
   }
 
-  hadesmem::Process const* process_{};
+  hadesmem::Process process_;
   void*** class_base_{};
   void** old_vmt_{};
   std::size_t vmt_size_{};

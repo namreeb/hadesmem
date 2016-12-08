@@ -67,7 +67,7 @@ public:
            std::string const& function,
            DetourFuncT const& detour,
            ContextT context = ContextT())
-    : process_{&process},
+    : process_{process},
       module_(detail::ToUpperOrdinal(module)),
       function_(function),
       detour_{detour},
@@ -97,7 +97,7 @@ public:
   PatchIat& operator=(PatchIat const& other) = delete;
 
   PatchIat(PatchIat&& other)
-    : process_{other.process_},
+    : process_{std::move(other.process_)},
       module_{std::move(other.module_)},
       function_{std::move(other.function_)},
       detour_{std::move(other.detour_)},
@@ -105,26 +105,18 @@ public:
       eat_hook_{std::move(other.eat_hook_)},
       iat_hooks_{std::move(other.iat_hooks_)},
   {
-    other.process_ = nullptr;
   }
 
   PatchIat& operator=(PatchIat&& other)
   {
     RemoveUnchecked();
 
-    process_ = other.process_;
-    other.process_ = nullptr;
-
+    process_ = std::move(other.process_);
     module_ = std::move(other.module_);
-
     function_ = std::move(other.function_);
-
     detour_ = std::move(other.detour_);
-
     context_ = std::move(other.context_);
-
     eat_hook_ = std::move(other.eat_hook_);
-
     iat_hooks_ = std::move(other.iat_hooks_);
 
     return *this;
@@ -184,7 +176,7 @@ private:
   void HookModule(Module const& m)
   {
     hadesmem::PeFile const pe_file{
-      *process_, m.GetHandle(), hadesmem::PeFileType::kImage, 0};
+      process_, m.GetHandle(), hadesmem::PeFileType::kImage, 0};
 
     auto const cur_mod_name = detail::ToUpperOrdinal(m.GetName());
     if (cur_mod_name == module_)
@@ -197,7 +189,7 @@ private:
 
   void HookModuleExports(PeFile const& pe_file)
   {
-    hadesmem::ExportList exports{*process_, pe_file};
+    hadesmem::ExportList exports{process_, pe_file};
     for (auto& e : exports)
     {
       if (function_ != e.GetName())
@@ -220,13 +212,13 @@ private:
         "Got export at [%p] with value [%p].", e.GetRvaPtr(), e.GetVa());
 
       eat_hook_ = std::make_unique<PatchFuncRva<TargetFuncT, ContextT>>(
-        *process_, pe_file.GetBase(), e.GetRvaPtr(), detour_, context_);
+        process_, pe_file.GetBase(), e.GetRvaPtr(), detour_, context_);
     }
   }
 
   void HookModuleImports(PeFile const& pe_file)
   {
-    hadesmem::ImportDirList const import_dirs{*process_, pe_file};
+    hadesmem::ImportDirList const import_dirs{process_, pe_file};
     for (auto const& id : import_dirs)
     {
       // TODO: Handle forwarded exports here also? i.e. Hook both things that
@@ -246,9 +238,9 @@ private:
   void HookModuleImportDir(PeFile const& pe_file, hadesmem::ImportDir const& id)
   {
     hadesmem::ImportThunkList import_thunks{
-      *process_, pe_file, id.GetFirstThunk()};
+      process_, pe_file, id.GetFirstThunk()};
     hadesmem::ImportThunkList orig_import_thunks{
-      *process_, pe_file, id.GetOriginalFirstThunk()};
+      process_, pe_file, id.GetOriginalFirstThunk()};
     for (auto it = std::begin(import_thunks),
               oit = std::begin(orig_import_thunks);
          it != std::end(import_thunks) && oit != std::end(orig_import_thunks);
@@ -269,11 +261,11 @@ private:
       auto const func_ptr =
         reinterpret_cast<TargetFuncRawT*>(it->GetFunctionPtr());
       iat_hook = std::make_unique<PatchFuncPtr<TargetFuncT, ContextT>>(
-        *process_, func_ptr, detour_, context_);
+        process_, func_ptr, detour_, context_);
     }
   }
 
-  Process const* process_;
+  Process process_;
   std::wstring module_{};
   std::string function_{};
   DetourFuncT detour_{};

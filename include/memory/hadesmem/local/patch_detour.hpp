@@ -95,7 +95,7 @@ public:
                        TargetFuncRawT target,
                        DetourFuncT const& detour,
                        ContextT context = ContextT())
-    : process_{&process},
+    : process_{process},
       target_{detail::AliasCast<void*>(target)},
       detour_{detour},
       context_(std::move(context)),
@@ -121,7 +121,7 @@ public:
   PatchDetour& operator=(PatchDetour const& other) = delete;
 
   PatchDetour(PatchDetour&& other)
-    : process_{other.process_},
+    : process_{std::move(other.process_)},
       applied_{other.applied_},
       target_{other.target_},
       detour_{std::move(other.detour_)},
@@ -143,8 +143,7 @@ public:
   {
     RemoveUnchecked();
 
-    process_ = other.process_;
-    other.process_ = nullptr;
+    process_ = std::move(other.process_);
 
     applied_ = other.applied_;
     other.applied_ = false;
@@ -206,12 +205,12 @@ public:
     // threads are suspended already (e.g. creation-time injection).
     // Need to fix the potential deadlock problem, as well as the perf
     // problem, before re-enabling this.
-    // SuspendedProcess const suspended_process{process_->GetId()};
+    // SuspendedProcess const suspended_process{process_.GetId()};
 
     std::uint32_t const kMaxInstructionLen = 15;
     std::uint32_t const kTrampSize = kMaxInstructionLen * 3;
 
-    trampoline_ = std::make_unique<Allocator>(*process_, kTrampSize);
+    trampoline_ = std::make_unique<Allocator>(process_, kTrampSize);
     auto tramp_cur = static_cast<std::uint8_t*>(trampoline_->GetBase());
 
     auto const detour_raw = detour_.target<DetourFuncRawT>();
@@ -223,8 +222,7 @@ public:
       detour_raw,
       trampoline_->GetBase());
 
-    auto const buffer =
-      ReadVector<std::uint8_t>(*process_, target_, kTrampSize);
+    auto const buffer = ReadVector<std::uint8_t>(process_, target_, kTrampSize);
 
     // TODO: Port to use Capstone instead.
     // TODO: Add a disassembler module to abstract away the actual disassembly
@@ -244,7 +242,7 @@ public:
 #error "[HadesMem] Unsupported architecture."
 #endif
 
-    stub_gate_ = detail::AllocatePageNear(*process_, target_);
+    stub_gate_ = detail::AllocatePageNear(process_, target_);
 
     std::size_t const patch_size = GetPatchSize();
 
@@ -311,26 +309,26 @@ public:
         auto const resolved_target =
           resolve_rel(insn_base, insn_target, insn_len);
         void* const jump_target =
-          is_jimm ? resolved_target : Read<void*>(*process_, resolved_target);
+          is_jimm ? resolved_target : Read<void*>(process_, resolved_target);
         HADESMEM_DETAIL_TRACE_FORMAT_A("Jump/call target = %p.", jump_target);
         if (ud_obj.mnemonic == UD_Ijmp)
         {
           HADESMEM_DETAIL_TRACE_A("Writing resolved jump.");
           tramp_cur += detail::WriteJump(
-            *process_, tramp_cur, jump_target, true, &trampolines_);
+            process_, tramp_cur, jump_target, true, &trampolines_);
         }
         else
         {
           HADESMEM_DETAIL_ASSERT(ud_obj.mnemonic == UD_Icall);
           HADESMEM_DETAIL_TRACE_A("Writing resolved call.");
           tramp_cur +=
-            detail::WriteCall(*process_, tramp_cur, jump_target, trampolines_);
+            detail::WriteCall(process_, tramp_cur, jump_target, trampolines_);
         }
       }
       else
       {
         std::uint8_t const* const raw = ud_insn_ptr(&ud_obj);
-        Write(*process_, tramp_cur, raw, raw + len);
+        Write(process_, tramp_cur, raw, raw + len);
         tramp_cur += len;
       }
 
@@ -340,28 +338,28 @@ public:
     HADESMEM_DETAIL_TRACE_A("Writing jump back to original code.");
 
     tramp_cur +=
-      detail::WriteJump(*process_,
+      detail::WriteJump(process_,
                         tramp_cur,
                         reinterpret_cast<std::uint8_t*>(target_) + instr_size,
                         true,
                         &trampolines_);
 
     FlushInstructionCache(
-      *process_, trampoline_->GetBase(), trampoline_->GetSize());
+      process_, trampoline_->GetBase(), trampoline_->GetSize());
 
-    detail::WriteStubGate<TargetFuncT>(*process_,
+    detail::WriteStubGate<TargetFuncT>(process_,
                                        stub_gate_->GetBase(),
                                        &*stub_,
                                        &GetOriginalArbitraryUserPtrPtr,
                                        &GetReturnAddressPtrPtr);
 
-    orig_ = ReadVector<std::uint8_t>(*process_, target_, patch_size);
+    orig_ = ReadVector<std::uint8_t>(process_, target_, patch_size);
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+    detail::VerifyPatchThreads(process_.GetId(), target_, orig_.size());
 
     WritePatch();
 
-    FlushInstructionCache(*process_, target_, instr_size);
+    FlushInstructionCache(process_, target_, instr_size);
 
     applied_ = true;
   }
@@ -373,11 +371,11 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process{process_->GetId()};
+    SuspendedProcess const suspended_process{process_.GetId()};
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, orig_.size());
+    detail::VerifyPatchThreads(process_.GetId(), target_, orig_.size());
     detail::VerifyPatchThreads(
-      process_->GetId(), trampoline_->GetBase(), trampoline_->GetSize());
+      process_.GetId(), trampoline_->GetBase(), trampoline_->GetSize());
 
     RemovePatch();
 
@@ -400,7 +398,6 @@ public:
         boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
-      process_ = nullptr;
       applied_ = false;
 
       target_ = nullptr;
@@ -478,14 +475,14 @@ protected:
     HADESMEM_DETAIL_TRACE_A("Writing jump to stub.");
 
     detail::WriteJump(
-      *process_, target_, stub_gate_->GetBase(), false, &trampolines_);
+      process_, target_, stub_gate_->GetBase(), false, &trampolines_);
   }
 
   virtual void RemovePatch()
   {
     HADESMEM_DETAIL_TRACE_A("Restoring original bytes.");
 
-    WriteVector(*process_, target_, orig_);
+    WriteVector(process_, target_, orig_);
   }
 
   virtual bool CanHookChainImpl() const noexcept
@@ -493,7 +490,7 @@ protected:
     return true;
   }
 
-  Process const* process_{};
+  Process process_;
   bool applied_{false};
   bool detached_{false};
   void* target_{};
