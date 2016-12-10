@@ -198,13 +198,13 @@ inline std::vector<std::uint8_t> GenCallTramp64(void* address, void* target)
 inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 {
   // clang-format off
-      std::vector<std::uint8_t> buf =
-      {
-        // PUSH 0xDEADBEEF
-        0x68, 0xEF, 0xBE, 0xAD, 0xDE,
-        // RET
-        0xC3
-      };
+  std::vector<std::uint8_t> buf =
+  {
+    // PUSH 0xDEADBEEF
+    0x68, 0xEF, 0xBE, 0xAD, 0xDE,
+    // RET
+    0xC3
+  };
   // clang-format on
   auto const op_len = 1;
   auto const target_low = static_cast<std::uint32_t>(
@@ -216,15 +216,15 @@ inline std::vector<std::uint8_t> GenPush32Ret(void* target)
 inline std::vector<std::uint8_t> GenPush64Ret(void* target)
 {
   // clang-format off
-      std::vector<std::uint8_t> buf =
-      {
-        // PUSH 0xDEADBEEF
-        0x68, 0xEF, 0xBE, 0xAD, 0xDE,
-        // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
-        0xC7, 0x44, 0x24, 0x04, 0xEF, 0xBE, 0xAD, 0xDE,
-        // RET
-        0xC3
-      };
+  std::vector<std::uint8_t> buf =
+  {
+    // PUSH 0xDEADBEEF
+    0x68, 0xEF, 0xBE, 0xAD, 0xDE,
+    // MOV DWORD PTR [RSP+0x4], 0xDEADBEEF
+    0xC7, 0x44, 0x24, 0x04, 0xEF, 0xBE, 0xAD, 0xDE,
+    // RET
+    0xC3
+  };
   // clang-format on
   auto const low_data_offs = 1;
   auto const high_data_offs = 9;
