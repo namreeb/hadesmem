@@ -72,8 +72,10 @@ inline std::unique_ptr<Allocator> AllocatePageNear(Process const& process,
                     : std::unique_ptr<Allocator>();
   };
 
-  // TODO: Remove this now that it appears to be fixed (the mov is now a
-  // movsxd).
+  // NOTE: The issue described below now appears to be fixed (the mov is now a
+  // movsxd), but it doesn't hurt to keep the logic this way (especially since
+  // it's a fairly generic problem that other hooking libraries are likely to
+  // have at some point or another).
   // Do two separate passes when looking for trampolines, ensuring to scan
   // forwards first. This is because there is a bug in Steam's overlay (last
   // checked and confirmed in SteamOverlayRender64.dll v2.50.25.37) where
@@ -382,11 +384,11 @@ inline std::vector<std::uint8_t> GenStubGate32(void* stub,
 {
   HADESMEM_DETAIL_ASSERT(stub);
   HADESMEM_DETAIL_ASSERT(get_orig_user_ptr_ptr_fn);
-  // Add NOPs so Steam overlay works. It follows our hook, and it does not
-  // recognize the opcode sequence otherwise.
   // clang-format off
   std::vector<std::uint8_t> buf =
   {
+    // Add NOPs so Steam overlay works. It follows our hook, and it does not 
+    // recognize the opcode sequence otherwise.
     // NOP (x 5)
     0x90, 0x90, 0x90, 0x90, 0x90,
     // PUSHAD

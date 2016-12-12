@@ -1128,7 +1128,7 @@ private:
     auto const section_datas =
       CopySectionData(local_process, pe_file_headers, nt_headers, raw_new, raw);
     raw_new.reserve(raw_new.size() * 2);
-    
+
     const auto dword_max = (std::numeric_limits<DWORD>::max)();
     HADESMEM_DETAIL_ASSERT(raw_new.size() < dword_max);
     HADESMEM_DETAIL_ASSERT(raw_new.capacity() < dword_max);
@@ -1829,6 +1829,9 @@ private:
   // for its original purpose it still serves as an example of how to extend the
   // import redirection resolution code.
   // TODO: This should be a plugin/extension/whatever.
+  // TODO: Further perf improvements by using the buffer and memory region info
+  // we already have in the memory scanning function, rather than duplicating
+  // work here (and in other 'extensions').
   void* ResolveRedirectedImportForOverwatch(void* va) const
   {
 #if defined(HADESMEM_DETAIL_ARCH_X64)
@@ -1840,29 +1843,28 @@ private:
         return nullptr;
       }
 
+      const auto stub_buf = ReadVector<std::uint8_t>(*process_, stub, 0x11);
+
       // mov rax, imm64
-      if (Read<std::uint8_t>(*process_, &stub[0]) != 0x48 ||
-          Read<std::uint8_t>(*process_, &stub[1]) != 0xB8)
+      if (stub_buf[0] != 0x48 || stub_buf[1] != 0xB8)
       {
         return nullptr;
       }
 
       // add rax, imm32
-      if (Read<std::uint8_t>(*process_, &stub[0xA]) != 0x48 ||
-          Read<std::uint8_t>(*process_, &stub[0xB]) != 0x05)
+      if (stub_buf[0xA] != 0x48 || stub_buf[0xB] != 0x05)
       {
         return nullptr;
       }
 
       // jmp rax
-      if (Read<std::uint8_t>(*process_, &stub[0x10]) != 0xFF ||
-          Read<std::uint8_t>(*process_, &stub[0x11]) != 0xE0)
+      if (stub_buf[0x10] != 0xFF || stub_buf[0x11] != 0xE0)
       {
         return nullptr;
       }
 
-      auto const o = Read<std::uint8_t*>(*process_, &stub[2]);
-      auto const n = Read<std::uint32_t>(*process_, &stub[0xc]);
+      auto const o = *reinterpret_cast<std::uint8_t* const*>(&stub_buf[2]);
+      auto const n = *reinterpret_cast<std::uint32_t const*>(&stub_buf[0xc]);
 
       return o + n;
     }
