@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\acl.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\alloc.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\call.hpp" />
     <ClInclude Include="..\..\..\include\memory\hadesmem\config.hpp" />

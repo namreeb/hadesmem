@@ -15,6 +15,7 @@
 #include <tclap/CmdLine.h>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
 
+#include <hadesmem/acl.hpp>
 #include <hadesmem/call.hpp>
 #include <hadesmem/config.hpp>
 #include <hadesmem/debug_privilege.hpp>
@@ -94,6 +95,8 @@ int main(int argc, char* argv[])
       cmd};
     TCLAP::ValueArg<DWORD> steam_app_id_arg{
       "", "steam-app-id", "Steam app id", false, 0, "uint32_t", cmd};
+    TCLAP::SwitchArg fix_acls_arg{
+      "", "fix-acls", "Unharden ACLs of remote process", cmd};
     cmd.parse(argc, argv);
 
     bool const free = free_arg.isSet();
@@ -110,9 +113,9 @@ int main(int argc, char* argv[])
     {
       HADESMEM_DETAIL_THROW_EXCEPTION(hadesmem::Error{}
                                       << hadesmem::ErrorString{
-                                        "Exports can only be called without "
-                                        "injection on running targets. Did "
-                                        "you mean to use --inject?"});
+                                           "Exports can only be called without "
+                                           "injection on running targets. Did "
+                                           "you mean to use --inject?"});
     }
 
     bool const call_export = export_arg.isSet();
@@ -162,21 +165,24 @@ int main(int argc, char* argv[])
         std::wcout << "\nFailed to acquire SeDebugPrivilege.\n";
       }
 
-      std::unique_ptr<hadesmem::Process> process;
+      auto const proc_name =
+        has_pid ? L""
+                : hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
+      bool const name_forced = name_forced_arg.isSet();
+      DWORD const pid =
+        has_pid
+          ? pid_arg.getValue()
+          : hadesmem::GetProcessEntryByName(proc_name, name_forced).GetId();
 
-      if (has_pid)
+      if (fix_acls_arg.isSet())
       {
-        DWORD const pid = pid_arg.getValue();
-        process = std::make_unique<hadesmem::Process>(pid);
+        hadesmem::CloneDaclsToRemoteProcess(pid);
       }
-      else
-      {
-        auto const proc_name =
-          hadesmem::detail::MultiByteToWideChar(name_arg.getValue());
-        bool const name_forced = name_forced_arg.isSet();
-        process = std::make_unique<hadesmem::Process>(
-          hadesmem::GetProcessByName(proc_name, name_forced));
-      }
+
+      std::unique_ptr<hadesmem::Process> process =
+        has_pid ? std::make_unique<hadesmem::Process>(pid)
+                : std::make_unique<hadesmem::Process>(
+                    hadesmem::GetProcessByName(proc_name, name_forced));
 
       HMODULE module = nullptr;
 
@@ -229,8 +235,7 @@ int main(int argc, char* argv[])
       std::transform(std::begin(exe_args_tmp),
                      std::end(exe_args_tmp),
                      std::back_inserter(exe_args),
-                     [](std::string const& s)
-                     {
+                     [](std::string const& s) {
                        return hadesmem::detail::MultiByteToWideChar(s);
                      });
       auto const export_name = export_arg.getValue();

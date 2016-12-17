@@ -333,5 +333,8 @@
     <ClInclude Include="..\..\..\include\memory\hadesmem\detail\veh_chain.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\memory\hadesmem\acl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

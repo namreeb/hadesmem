@@ -417,5 +417,23 @@ struct EventLogPolicy
 };
 
 using SmartEventLogHandle = SmartHandleImpl<EventLogPolicy>;
+
+struct LocalFreePolicy
+{
+  using HandleT = PVOID;
+
+  static HandleT GetInvalid() noexcept
+  {
+    return nullptr;
+  }
+
+  static bool Cleanup(HandleT handle)
+  {
+    // LocalFree returns NULL on success.
+    return !::LocalFree(handle);
+  }
+};
+
+using SmartLocalFreeHandle = SmartHandleImpl<LocalFreePolicy>;
 }
 }
