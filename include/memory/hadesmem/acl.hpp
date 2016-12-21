@@ -39,7 +39,8 @@ void CloneDaclsToRemoteProcess(DWORD pid)
   hadesmem::detail::SmartLocalFreeHandle security_descriptor_cleanup(
     security_descriptor);
 
-  hadesmem::detail::SmartHandle const proc(OpenProcess(WRITE_DAC, FALSE, pid));
+  hadesmem::detail::SmartHandle const proc(
+    ::OpenProcess(WRITE_DAC, FALSE, pid));
   if (!proc.IsValid())
   {
     DWORD const last_error = ::GetLastError();
