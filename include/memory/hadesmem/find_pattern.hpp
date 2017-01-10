@@ -16,14 +16,18 @@
 
 #include <windows.h>
 
+#if !defined(HADESMEM_NO_PUGIXML)
 #include <hadesmem/detail/warning_disable_prefix.hpp>
 #include <pugixml.hpp>
 #include <pugixml.cpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
+#endif
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
+#if !defined(HADESMEM_NO_PUGIXML)
 #include <hadesmem/detail/pugixml_helpers.hpp>
+#endif
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
@@ -504,6 +508,7 @@ inline void* FindInFile(Process const& process,
   return Find(process, base, size, data, flags, start, name);
 }
 
+#if !defined(HADESMEM_NO_PUGIXML)
 class Pattern
 {
 public:
@@ -1164,4 +1169,5 @@ private:
   Process const* process_;
   ModuleMap find_pattern_datas_;
 };
+#endif // #if !defined(HADESMEM_NO_PUGIXML)
 }
