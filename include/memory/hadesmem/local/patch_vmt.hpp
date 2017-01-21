@@ -143,7 +143,7 @@ public:
     auto const target = reinterpret_cast<TargetFuncRawT*>(
       &reinterpret_cast<void**>(new_vmt_base_)[idx]);
     auto const patch =
-      new PatchFuncPtr<TargetFuncT>(*process_, target, detour, context);
+      new PatchFuncPtr<TargetFuncT>(process_, target, detour, context);
     hooks_.emplace_back(patch);
     patch->Apply();
   }
