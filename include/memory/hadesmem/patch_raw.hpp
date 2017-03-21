@@ -27,7 +27,7 @@ public:
   explicit PatchRaw(Process const& process,
                     void* target,
                     std::vector<std::uint8_t> const& data)
-    : process_{&process}, target_{target}, data_(data)
+    : process_{process}, target_{target}, data_(data)
   {
   }
 
@@ -40,13 +40,12 @@ public:
   PatchRaw& operator=(PatchRaw const& other) = delete;
 
   PatchRaw(PatchRaw&& other)
-    : process_{other.process_},
+    : process_{std::move(other.process_)},
       applied_{other.applied_},
       target_{other.target_},
       data_(std::move(other.data_)),
       orig_(std::move(other.orig_))
   {
-    other.process_ = nullptr;
     other.applied_ = false;
     other.target_ = nullptr;
   }
@@ -55,8 +54,7 @@ public:
   {
     RemoveUnchecked();
 
-    process_ = other.process_;
-    other.process_ = nullptr;
+    process_ = std::move(other.process_);
 
     applied_ = other.applied_;
     other.applied_ = false;
@@ -94,15 +92,15 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process{process_->GetId()};
+    SuspendedProcess const suspended_process{process_.GetId()};
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
+    detail::VerifyPatchThreads(process_.GetId(), target_, data_.size());
 
-    orig_ = ReadVector<std::uint8_t>(*process_, target_, data_.size());
+    orig_ = ReadVector<std::uint8_t>(process_, target_, data_.size());
 
-    WriteVector(*process_, target_, data_);
+    WriteVector(process_, target_, data_);
 
-    FlushInstructionCache(*process_, target_, data_.size());
+    FlushInstructionCache(process_, target_, data_.size());
 
     applied_ = true;
   }
@@ -114,13 +112,13 @@ public:
       return;
     }
 
-    SuspendedProcess const suspended_process{process_->GetId()};
+    SuspendedProcess const suspended_process{process_.GetId()};
 
-    detail::VerifyPatchThreads(process_->GetId(), target_, data_.size());
+    detail::VerifyPatchThreads(process_.GetId(), target_, data_.size());
 
-    WriteVector(*process_, target_, orig_);
+    WriteVector(process_, target_, orig_);
 
-    FlushInstructionCache(*process_, target_, orig_.size());
+    FlushInstructionCache(process_, target_, orig_.size());
 
     applied_ = false;
   }
@@ -146,7 +144,6 @@ private:
         boost::current_exception_diagnostic_information().c_str());
       HADESMEM_DETAIL_ASSERT(false);
 
-      process_ = nullptr;
       applied_ = false;
 
       target_ = nullptr;
@@ -155,7 +152,7 @@ private:
     }
   }
 
-  Process const* process_;
+  Process process_;
   bool applied_{false};
   bool detached_{false};
   PVOID target_;
