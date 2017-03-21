@@ -96,7 +96,7 @@ public:
                        DetourFuncT const& detour,
                        ContextT context = ContextT())
     : process_{process},
-      target_{detail::AliasCast<void*>(target)},
+      target_{detail::AliasCastUnchecked<void*>(target)},
       detour_{detour},
       context_(std::move(context)),
       stub_{std::make_unique<StubT>(this)}
