@@ -21,13 +21,13 @@
 #include <pugixml.hpp>
 #include <pugixml.cpp>
 #include <hadesmem/detail/warning_disable_suffix.hpp>
-#endif
+#endif // #if !defined(HADESMEM_NO_PUGIXML)
 
 #include <hadesmem/config.hpp>
 #include <hadesmem/detail/assert.hpp>
 #if !defined(HADESMEM_NO_PUGIXML)
 #include <hadesmem/detail/pugixml_helpers.hpp>
-#endif
+#endif // #if !defined(HADESMEM_NO_PUGIXML)
 #include <hadesmem/detail/smart_handle.hpp>
 #include <hadesmem/detail/static_assert.hpp>
 #include <hadesmem/detail/str_conv.hpp>
