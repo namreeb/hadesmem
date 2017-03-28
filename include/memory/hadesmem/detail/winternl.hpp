@@ -982,13 +982,22 @@ typedef struct _OBJECT_NAME_INFORMATION
   UNICODE_STRING Name;
 } OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
 
-typedef struct _RTL_VEH_NODE
+typedef struct LdrpVectorHandlerEntry
 {
-  _RTL_VEH_NODE* Prev;
-  _RTL_VEH_NODE* Next;
-  UINT Refs;
+  LdrpVectorHandlerEntry* Next;
+  LdrpVectorHandlerEntry* Prev;
+  ULONG Refs;
   PVOID Handler;
-} VEH_NODE, *PVEH_NODE;
+}VECTORED_HANDLER_ENTRY, *PVECTORED_HANDLER_ENTRY;
+
+//
+// Credits: http://www.codereversing.com/blog/archives/205
+typedef struct LdrpVectorHandlerList
+{
+  SRWLOCK SrwLock;
+  LdrpVectorHandlerEntry* First;
+  LdrpVectorHandlerEntry* Last;
+}VECTORED_HANDLER_LIST, *PVECTORED_HANDLER_LIST;
 }
 }
 }
