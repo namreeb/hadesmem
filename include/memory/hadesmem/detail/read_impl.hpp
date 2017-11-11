@@ -87,7 +87,7 @@ inline void ReadImpl(Process const& process,
       {
         std::fill(static_cast<std::uint8_t*>(data),
                   static_cast<std::uint8_t*>(data) + len,
-                  0);
+                  static_cast<std::uint8_t>(0));
       }
       else
       {
@@ -108,7 +108,7 @@ inline void ReadImpl(Process const& process,
       {
         std::fill(static_cast<std::uint8_t*>(data),
                   static_cast<std::uint8_t*>(data) + len_new,
-                  0);
+                  static_cast<std::uint8_t>(0));
       }
       else
       {
