@@ -3,7 +3,7 @@
 	url = https://github.com/asmjit/asmjit
 [submodule "deps/pugixml/pugixml"]
 	path = deps/pugixml/pugixml
-	url = https://github.com/RaptorFactor/pugixml
+	url = https://github.com/zeux/pugixml
 [submodule "deps/udis86/udis86"]
 	path = deps/udis86/udis86
 	url = https://github.com/RaptorFactor/udis86
