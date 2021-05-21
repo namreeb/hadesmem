@@ -1,6 +1,6 @@
 [submodule "deps/asmjit/asmjit"]
 	path = deps/asmjit/asmjit
-	url = https://github.com/RaptorFactor/asmjit
+	url = https://github.com/asmjit/asmjit
 [submodule "deps/pugixml/pugixml"]
 	path = deps/pugixml/pugixml
 	url = https://github.com/RaptorFactor/pugixml
