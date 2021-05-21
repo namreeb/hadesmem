@@ -12,4 +12,4 @@
 	url = https://github.com/ocornut/imgui
 [submodule "deps/chaiscript/chaiscript"]
 	path = deps/chaiscript/chaiscript
-	url = https://github.com/RaptorFactor/ChaiScript.git
+	url = https://github.com/ChaiScript/ChaiScript.git
