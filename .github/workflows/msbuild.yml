@@ -31,3 +31,17 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild build\vs\hadesmem.sln -target:hadesmem /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v142 
+
+    - name: Setup Artifact
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |	
+        mkdir artifact
+        mkdir artifact\lib
+        mkdir artifact\memory
+        copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib artifact\lib
+        xcopy /e include artifact\include
+        
+    - uses: actions/upload-artifact@v2
+      with:	
+        name: ${{ env.name }}-${{ matrix.configuration }}-${{ matrix.platform }}
+        path: ${{ github.workspace }}/artifact/**/*
