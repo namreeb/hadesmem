@@ -20,8 +20,8 @@ jobs:
       with:
         python-version: 2.7
 
-    - name: Find python
-      run: set && echo python && where python
+    - name: Fix udis86
+      run: New-Item -ItemType SymbolicLink -Path $Env:pythonLocation -Target "C:\python27"
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
