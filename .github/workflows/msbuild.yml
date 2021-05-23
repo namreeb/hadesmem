@@ -37,7 +37,7 @@ jobs:
       run: |	
         mkdir artifact
         mkdir artifact\lib
-        mkdir artifact\memory
+        mkdir artifact\include
         copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib artifact\lib
         xcopy /e include artifact\include
         
