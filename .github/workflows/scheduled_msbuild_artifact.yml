@@ -3,7 +3,7 @@ name: scheduled_msbuild_artifact
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '*/5 * * * *'
+    - cron:  '0 0 * * 0'
 
 jobs:
   build:
@@ -49,4 +49,4 @@ jobs:
       with:	
         name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
         path: ${{ github.workspace }}/artifact/**/*
-        retention-days: 7
+        retention-days: 8
