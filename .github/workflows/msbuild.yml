@@ -40,7 +40,7 @@ jobs:
         xcopy /s /i include artifact\include
         xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h artifact\deps\asmjit\asmjit\src\asmjit
         xcopy /s /i deps\udis86\udis86\*.h artifact\deps\udis86\udis86
-        xcopy /s /i deps\pugixml\pugixml\src\*.hpp artifact\deps\pugixml\pugixml\src
+        xcopy /s /i deps\pugixml\pugixml\src\*.?pp artifact\deps\pugixml\pugixml\src
         
     - uses: actions/upload-artifact@v2
       with:	
