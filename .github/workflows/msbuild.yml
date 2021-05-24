@@ -37,14 +37,10 @@ jobs:
         mkdir artifact
         mkdir artifact\lib
         copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib artifact\lib
-        mkdir artifact\include
-        xcopy /s include artifact\include
-        mkdir artifact\include\asmjit
-        xcopy /s deps\asmjit\asmjit\src\asmjit\*.h artifact\include\asmjit
-        mkdir artifact\include\udis86
-        xcopy /s deps\udis86\udis86\*.h artifact\include\udis86
-        mkdir artifact\include\pugixml
-        xcopy /s deps\pugixml\pugixml\src\*.hpp artifact\include\pugixml
+        xcopy /s /i include artifact\include
+        xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h artifact\deps\asmjit\asmjit\src\asmjit
+        xcopy /s /i deps\udis86\udis86\*.h artifact\deps\udis86\udis86
+        xcopy /s /i deps\pugixml\pugixml\src\*.hpp artifact\deps\pugixml\pugixml\src
         
     - uses: actions/upload-artifact@v2
       with:	
