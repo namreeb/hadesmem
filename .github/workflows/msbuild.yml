@@ -29,8 +29,6 @@ jobs:
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild build\vs\hadesmem.sln -target:hadesmem /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:PlatformToolset=${{ matrix.toolset }}
 
     - name: Setup Artifact
@@ -38,11 +36,18 @@ jobs:
       run: |	
         mkdir artifact
         mkdir artifact\lib
-        mkdir artifact\include
         copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib artifact\lib
-        xcopy /e include artifact\include
+        mkdir artifact\include
+        xcopy /s include artifact\include
+        mkdir artifact\include\asmjit
+        xcopy /s deps\asmjit\asmjit\src\asmjit\*.h artifact\include\asmjit
+        mkdir artifact\include\udis86
+        xcopy /s deps\udis86\udis86\*.h artifact\include\udis86
+        mkdir artifact\include\pugixml
+        xcopy /s deps\pugixml\pugixml\src\*.hpp artifact\include\pugixml
         
     - uses: actions/upload-artifact@v2
       with:	
         name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
         path: ${{ github.workspace }}/artifact/**/*
+        retention-days: 8
