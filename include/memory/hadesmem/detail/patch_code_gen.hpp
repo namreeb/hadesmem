@@ -134,8 +134,8 @@ inline bool IsNear(void* address, void* target) noexcept
 #if defined(HADESMEM_DETAIL_ARCH_X64)
   auto const rel = reinterpret_cast<std::intptr_t>(target) -
                    reinterpret_cast<std::intptr_t>(address) - 5;
-  return rel > (std::numeric_limits<std::uint32_t>::min)() &&
-         rel < (std::numeric_limits<std::uint32_t>::max)();
+  return rel > (std::numeric_limits<std::int32_t>::min)() &&
+         rel < (std::numeric_limits<std::int32_t>::max)();
 #elif defined(HADESMEM_DETAIL_ARCH_X86)
   (void)address;
   (void)target;
