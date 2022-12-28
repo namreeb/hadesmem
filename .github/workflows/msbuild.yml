@@ -51,3 +51,16 @@ jobs:
         name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
         path: ${{ github.workspace }}/artifact/**/*
         retention-days: 8
+
+  release:
+    runs-on: ubuntu-latest
+    #on:
+    #  label:
+    #    types: [created]
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: artifact
+    - name: Debug
+      run: ls -R
