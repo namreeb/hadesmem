@@ -53,6 +53,7 @@ jobs:
         retention-days: 8
 
   release:
+    needs: build
     runs-on: ubuntu-latest
     #on:
     #  label:
