@@ -60,7 +60,5 @@ jobs:
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v3
-      with:
-        name: artifact
     - name: Debug
       run: ls -R
