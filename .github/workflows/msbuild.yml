@@ -56,11 +56,12 @@ jobs:
         xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h artifact\deps\asmjit\asmjit\src\asmjit
         xcopy /s /i deps\udis86\udis86\*.h artifact\deps\udis86\udis86
         xcopy /s /i deps\pugixml\pugixml\src\*.?pp artifact\deps\pugixml\pugixml\src
+        dir
 
     - uses: softprops/action-gh-release@v1
       name: Upload assets to release
       if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
-        files: artifact/*
+        files: artifact/**/*
         fail_on_unmatched_files: true
