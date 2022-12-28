@@ -4,19 +4,6 @@ on:
   push:
 
 jobs:
-  create_release:
-    runs-on: ubuntu-latest
-    steps:
-    - name: release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        draft: true
-        prerelease: false
-        release_name: Release ${{ github.ref }}
-        tag_name: ${{ github.ref }}
-
   build:
     needs: create_release
     runs-on: windows-latest
@@ -48,16 +35,16 @@ jobs:
 
     - name: Setup Artifact
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |	
-        mkdir artifact
-        mkdir artifact\lib
-        copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib artifact\lib
-        xcopy /s /i include artifact\include
-        xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h artifact\deps\asmjit\asmjit\src\asmjit
-        xcopy /s /i deps\udis86\udis86\*.h artifact\deps\udis86\udis86
-        xcopy /s /i deps\pugixml\pugixml\src\*.?pp artifact\deps\pugixml\pugixml\src
-        Compress-Archive artifact hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}.zip
-        dir
+      run: |
+        $artifact = "hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}"
+        mkdir $artifact
+        mkdir $artifact\lib
+        copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib $artifact\lib
+        xcopy /s /i include $artifact\include
+        xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h $artifact\deps\asmjit\asmjit\src\asmjit
+        xcopy /s /i deps\udis86\udis86\*.h $artifact\deps\udis86\udis86
+        xcopy /s /i deps\pugixml\pugixml\src\*.?pp $artifact\deps\pugixml\pugixml\src
+        Compress-Archive $artifact hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}.zip
 
     - uses: softprops/action-gh-release@v1
       name: Upload assets to release
