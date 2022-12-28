@@ -57,17 +57,18 @@ jobs:
         xcopy /s /i deps\udis86\udis86\*.h artifact\deps\udis86\udis86
         xcopy /s /i deps\pugixml\pugixml\src\*.?pp artifact\deps\pugixml\pugixml\src
         
-    - uses: actions/upload-artifact@v2
-      name: Upload Artifacts
-      with:	
-        name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
-        path: ${{ github.workspace }}/artifact/**/*
-        retention-days: 8
+    #- uses: actions/upload-artifact@v2
+    #  name: Upload Artifacts
+    #  with:
+    #    name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
+    #    path: ${{ github.workspace }}/artifact/**/*
+    #    retention-days: 8
 
     - uses: softprops/action-gh-release@v1
       name: Upload assets to release
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: artifact/**/*
+        files: ${{ github.workspace }}/artifact/**/*
 
   release:
     needs: build
