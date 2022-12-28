@@ -31,7 +31,7 @@ jobs:
         New-Item -ItemType SymbolicLink -Path "c:\python27" -Target $Env:pythonLocation
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
