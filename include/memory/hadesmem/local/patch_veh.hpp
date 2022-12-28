@@ -50,6 +50,10 @@ namespace hadesmem
 template <typename TargetFuncT> class PatchVeh : public PatchDetour<TargetFuncT>
 {
 public:
+  using StubT = detail::PatchDetourStub<TargetFuncT>;
+  using DetourFuncRawT = typename StubT::DetourFuncRawT;
+  using DetourFuncT = typename StubT::DetourFuncT;
+
   explicit PatchVeh(Process const& process,
                     TargetFuncT target,
                     DetourFuncT const& detour)
