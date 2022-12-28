@@ -2,12 +2,21 @@ name: MSBuild
 
 on:
   push:
-  schedule:
-  # * is a special character in YAML so you have to quote this string
-  - cron:  '0 0 * * 0'
 
 jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: release
+      uses: actions/create-release@v1
+      with:
+        draft: true
+        prerelease: false
+        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.ref }}
+
   build:
+    needs: create_release
     runs-on: windows-latest
     strategy:
       matrix:
@@ -47,10 +56,16 @@ jobs:
         xcopy /s /i deps\pugixml\pugixml\src\*.?pp artifact\deps\pugixml\pugixml\src
         
     - uses: actions/upload-artifact@v2
+      name: Upload Artifacts
       with:	
         name: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}
         path: ${{ github.workspace }}/artifact/**/*
         retention-days: 8
+
+    - uses: softprops/action-gh-release@v1
+      name: Upload assets to release
+      with:
+        files: artifact/**/*
 
   release:
     needs: build
