@@ -8,7 +8,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        toolset: [v142]
+        toolset: [v143]
         configuration: [Debug, Release]
         platform: [Win32, x64]
 
